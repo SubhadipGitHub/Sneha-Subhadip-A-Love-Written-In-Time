@@ -21,6 +21,9 @@ const lightbox = document.getElementById("memoryLightbox");
 const lightboxImage = document.getElementById("lightboxImage");
 const lightboxCaption = document.getElementById("lightboxCaption");
 const lightboxClose = document.getElementById("lightboxClose");
+const bgMusic = document.getElementById("bgMusic");
+const musicToggleBtn = document.getElementById("musicToggleBtn");
+const musicStatus = document.getElementById("musicStatus");
 
 function formatDuration(ms) {
     const totalSeconds = Math.floor(ms / 1000);
@@ -159,6 +162,35 @@ function setupMemoryLightbox() {
     });
 }
 
+function updateMusicUi(isPlaying) {
+    musicToggleBtn.textContent = isPlaying ? "Pause Music" : "Play Music";
+    musicToggleBtn.classList.toggle("playing", isPlaying);
+    musicStatus.textContent = isPlaying
+        ? "Background music is playing"
+        : "Tap to start background music";
+}
+
+async function toggleMusic() {
+    try {
+        if (bgMusic.paused) {
+            await bgMusic.play();
+            updateMusicUi(true);
+        } else {
+            bgMusic.pause();
+            updateMusicUi(false);
+        }
+    } catch (error) {
+        updateMusicUi(false);
+        musicStatus.textContent = "Unable to autoplay. Tap Play Music.";
+    }
+}
+
+function setupBackgroundMusic() {
+    bgMusic.volume = 0.35;
+    musicToggleBtn.addEventListener("click", toggleMusic);
+    updateMusicUi(false);
+}
+
 unlockBtn.addEventListener("click", unlockLoveLetter);
 secretInput.addEventListener("keydown", (event) => {
     if (event.key === "Enter") {
@@ -170,5 +202,6 @@ bindTabs();
 activateTab("home");
 setupRevealAnimations();
 setupMemoryLightbox();
+setupBackgroundMusic();
 updateTimers();
 setInterval(updateTimers, 1000);
