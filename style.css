@@ -409,6 +409,81 @@ p {
     color: var(--muted);
 }
 
+.about-us-card {
+    margin-top: 1rem;
+}
+
+.about-split {
+    position: relative;
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 1rem;
+}
+
+.about-split::before {
+    content: "";
+    position: absolute;
+    top: 0.2rem;
+    bottom: 0.2rem;
+    left: 50%;
+    width: 1px;
+    background: linear-gradient(to bottom, rgba(255, 220, 232, 0.15), rgba(255, 220, 232, 0.85), rgba(255, 220, 232, 0.15));
+}
+
+.about-pane {
+    text-align: center;
+    padding: 0.25rem 1rem 0.55rem;
+}
+
+.about-photo {
+    width: 128px;
+    height: 128px;
+    object-fit: cover;
+    border-radius: 50%;
+    border: 2px solid rgba(255, 255, 255, 0.45);
+    margin: 0 auto 0.65rem;
+    display: block;
+    box-shadow: 0 12px 24px rgba(0, 0, 0, 0.32);
+}
+
+.about-pane h3 {
+    margin: 0.2rem 0 0.35rem;
+    font-family: "Cinzel", serif;
+}
+
+.about-pane p {
+    margin: 0 0 0.8rem;
+    color: #ffeaf0;
+    font-size: 0.94rem;
+}
+
+.about-ig-link {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.45rem;
+    text-decoration: none;
+    padding: 0.55rem 0.9rem;
+    font-size: 0.84rem;
+    border-radius: 0.7rem;
+    background: linear-gradient(130deg, var(--accent-strong), #ec8f74);
+    color: #fff;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    font-weight: 700;
+}
+
+.about-ig-link svg {
+    width: 16px;
+    height: 16px;
+    fill: currentColor;
+}
+
+.about-ig-link:hover,
+.about-ig-link:focus-visible {
+    filter: brightness(1.06);
+    outline: none;
+}
+
 .memory-grid {
     display: grid;
     grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -1096,6 +1171,14 @@ input[type="password"]::placeholder {
 
     .itinerary-grid {
         grid-template-columns: 1fr;
+    }
+
+    .about-split {
+        grid-template-columns: 1fr;
+    }
+
+    .about-split::before {
+        display: none;
     }
 
     .timeline-row {
