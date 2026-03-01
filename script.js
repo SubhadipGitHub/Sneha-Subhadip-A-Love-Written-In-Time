@@ -16,6 +16,12 @@ const unlockBtn = document.getElementById("unlockBtn");
 const secretInput = document.getElementById("secretInput");
 const secretMessage = document.getElementById("secretMessage");
 
+const memoryCards = Array.from(document.querySelectorAll(".memory-card"));
+const lightbox = document.getElementById("memoryLightbox");
+const lightboxImage = document.getElementById("lightboxImage");
+const lightboxCaption = document.getElementById("lightboxCaption");
+const lightboxClose = document.getElementById("lightboxClose");
+
 function formatDuration(ms) {
     const totalSeconds = Math.floor(ms / 1000);
     const days = Math.floor(totalSeconds / (24 * 60 * 60));
@@ -70,7 +76,7 @@ function unlockLoveLetter() {
     const passcode = secretInput.value.trim().toLowerCase();
 
     if (passcode === "forever") {
-        secretMessage.textContent = "Sneha, from Kunafa to forever, I choose you today, tomorrow, and always. ❤️";
+        secretMessage.textContent = "Sneha, from Kunafa to forever, I choose you today, tomorrow, and always.";
         secretMessage.style.color = "#fff0d2";
         return;
     }
@@ -102,6 +108,57 @@ function setupRevealAnimations() {
     revealElements.forEach((el) => observer.observe(el));
 }
 
+function openLightbox(src, alt, caption) {
+    lightboxImage.src = src;
+    lightboxImage.alt = alt || "Full memory image";
+    lightboxCaption.textContent = caption;
+    lightbox.classList.add("open");
+    lightbox.setAttribute("aria-hidden", "false");
+    document.body.classList.add("modal-open");
+}
+
+function closeLightbox() {
+    lightbox.classList.remove("open");
+    lightbox.setAttribute("aria-hidden", "true");
+    document.body.classList.remove("modal-open");
+}
+
+function setupMemoryLightbox() {
+    memoryCards.forEach((card) => {
+        const image = card.querySelector("img");
+        const title = card.querySelector("h3")?.textContent?.trim() || "Memory";
+        const description = card.querySelector("p")?.textContent?.trim() || "";
+        const caption = description ? `${title}: ${description}` : title;
+
+        card.setAttribute("role", "button");
+        card.setAttribute("tabindex", "0");
+        card.setAttribute("aria-label", `Open ${title} memory`);
+
+        const openCardLightbox = () => openLightbox(image.src, image.alt, caption);
+
+        card.addEventListener("click", openCardLightbox);
+        card.addEventListener("keydown", (event) => {
+            if (event.key === "Enter" || event.key === " ") {
+                event.preventDefault();
+                openCardLightbox();
+            }
+        });
+    });
+
+    lightboxClose.addEventListener("click", closeLightbox);
+    lightbox.addEventListener("click", (event) => {
+        if (event.target === lightbox) {
+            closeLightbox();
+        }
+    });
+
+    document.addEventListener("keydown", (event) => {
+        if (event.key === "Escape" && lightbox.classList.contains("open")) {
+            closeLightbox();
+        }
+    });
+}
+
 unlockBtn.addEventListener("click", unlockLoveLetter);
 secretInput.addEventListener("keydown", (event) => {
     if (event.key === "Enter") {
@@ -112,5 +169,6 @@ secretInput.addEventListener("keydown", (event) => {
 bindTabs();
 activateTab("home");
 setupRevealAnimations();
+setupMemoryLightbox();
 updateTimers();
 setInterval(updateTimers, 1000);
