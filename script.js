@@ -34,9 +34,7 @@ const itineraryLocation = document.getElementById("itineraryLocation");
 const itineraryUploadLink = document.getElementById("itineraryUploadLink");
 const itineraryMapLink = document.getElementById("itineraryMapLink");
 const itineraryMap = document.getElementById("itineraryMap");
-const itineraryGames = document.getElementById("itineraryGames");
-const itineraryFood = document.getElementById("itineraryFood");
-const itineraryPerformances = document.getElementById("itineraryPerformances");
+const itineraryTimeline = document.getElementById("itineraryTimeline");
 const itineraryDetails = document.getElementById("itineraryDetails");
 const bgMusic = document.getElementById("bgMusic");
 const musicToggleBtn = document.getElementById("musicToggleBtn");
@@ -101,7 +99,7 @@ function unlockLoveLetter() {
     const passcode = secretInput.value.trim().toLowerCase();
 
     if (passcode === "forever") {
-        secretMessage.textContent = "Sneha, from Kunafa to forever, I choose you today, tomorrow, and always.";
+        secretMessage.textContent = "Sneha, from Kunafa to forever, I choose you today, tomorrow, and always. ❤️";
         secretMessage.style.color = "#fff0d2";
         return;
     }
@@ -237,11 +235,103 @@ function setupMemoryLightbox() {
     });
 }
 
+function parseLegacyProgramItems(type, value) {
+    if (!value) return [];
+
+    return value
+        .split(",")
+        .map((chunk) => chunk.trim())
+        .filter(Boolean)
+        .map((chunk) => {
+            const [timePart, ...rest] = chunk.split(" - ");
+            const title = rest.join(" - ").trim();
+            return {
+                category: type,
+                time: title ? timePart.trim() : "",
+                title: title || timePart.trim()
+            };
+        });
+}
+
+function parseProgramItems(item) {
+    const rawProgram = item.dataset.program || "";
+
+    if (rawProgram) {
+        return rawProgram
+            .split(";")
+            .map((entry) => entry.trim())
+            .filter(Boolean)
+            .map((entry) => {
+                const [category = "", time = "", title = ""] = entry.split("|").map((part) => part.trim());
+                return {
+                    category: category.toLowerCase(),
+                    time,
+                    title: title || "Program item"
+                };
+            });
+    }
+
+    return [
+        ...parseLegacyProgramItems("games", item.dataset.games || ""),
+        ...parseLegacyProgramItems("food", item.dataset.food || ""),
+        ...parseLegacyProgramItems("performances", item.dataset.performances || "")
+    ];
+}
+
+function renderEventTimeline(items) {
+    if (!itineraryTimeline) return;
+    itineraryTimeline.innerHTML = "";
+
+    if (!items.length) {
+        const emptyRow = document.createElement("li");
+        emptyRow.className = "timeline-row";
+        emptyRow.innerHTML = `
+            <span class="timeline-time">TBA</span>
+            <div class="timeline-body">
+                <span class="timeline-category performances">Program</span>
+                <p class="timeline-title">Detailed schedule will be shared soon.</p>
+            </div>
+        `;
+        itineraryTimeline.appendChild(emptyRow);
+        return;
+    }
+
+    items.forEach((entry) => {
+        const row = document.createElement("li");
+        row.className = "timeline-row";
+
+        const time = document.createElement("span");
+        time.className = "timeline-time";
+        time.textContent = entry.time || "TBA";
+
+        const body = document.createElement("div");
+        body.className = "timeline-body";
+
+        const category = document.createElement("span");
+        const safeCategory = ["games", "food", "performances"].includes(entry.category)
+            ? entry.category
+            : "performances";
+        category.className = `timeline-category ${safeCategory}`;
+        category.textContent = safeCategory;
+
+        const title = document.createElement("p");
+        title.className = "timeline-title";
+        title.textContent = entry.title || "Program item";
+
+        body.appendChild(category);
+        body.appendChild(title);
+        row.appendChild(time);
+        row.appendChild(body);
+        itineraryTimeline.appendChild(row);
+    });
+}
+
 function openItineraryModal(item) {
     const mapQuery = item.dataset.mapQuery || item.dataset.location || "";
     const mapEmbed = `https://www.google.com/maps?q=${encodeURIComponent(mapQuery)}&output=embed`;
     const mapOpen = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(mapQuery)}`;
     const uploadLink = item.dataset.upload || "#";
+    const programItems = parseProgramItems(item);
 
     itineraryTag.textContent = "Wedding Event";
     itineraryTitle.textContent = item.dataset.event || "Event Details";
@@ -252,9 +342,7 @@ function openItineraryModal(item) {
     itineraryUploadLink.href = uploadLink;
     itineraryMapLink.href = mapOpen;
     itineraryMap.src = mapEmbed;
-    itineraryGames.textContent = item.dataset.games || "To be announced";
-    itineraryFood.textContent = item.dataset.food || "To be announced";
-    itineraryPerformances.textContent = item.dataset.performances || "To be announced";
+    renderEventTimeline(programItems);
     itineraryDetails.textContent = item.dataset.details || "";
 
     itineraryModal.classList.add("open");

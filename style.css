@@ -79,23 +79,73 @@ body.modal-open {
 }
 
 .hero-kicker {
+    position: relative;
+    display: inline-block;
     margin: 0;
     letter-spacing: 0.18em;
     text-transform: uppercase;
     font-size: 0.73rem;
     color: var(--muted);
+    animation: kickerSparkle 4.5s ease-in-out infinite;
 }
 
 .hero h1 {
+    position: relative;
+    display: inline-block;
     margin: 0.45rem 0 0.3rem;
     font-family: "Cinzel", serif;
     font-size: clamp(2rem, 6vw, 4rem);
     font-weight: 700;
     text-shadow: 0 8px 35px rgba(0, 0, 0, 0.38);
+    background: linear-gradient(120deg, #fff7fb 20%, #ffd8e8 45%, #fff 62%, #ffc4da 80%);
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+    animation: heroDiamondShine 6s ease-in-out infinite;
 }
 
 .hero h1 span {
-    color: #ffdce4;
+    color: #fff0f6;
+    text-shadow: 0 0 20px rgba(255, 195, 220, 0.9);
+}
+
+.hero h1::after {
+    content: "";
+    position: absolute;
+    top: -8%;
+    left: -28%;
+    width: 26%;
+    height: 120%;
+    transform: rotate(18deg);
+    background: linear-gradient(
+        120deg,
+        rgba(255, 255, 255, 0) 0%,
+        rgba(255, 255, 255, 0.5) 46%,
+        rgba(255, 255, 255, 0) 100%
+    );
+    animation: heroTextSweep 5.2s ease-in-out infinite;
+    pointer-events: none;
+}
+
+.hero-kicker::before,
+.hero-kicker::after {
+    content: "◆";
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%) scale(0.95);
+    color: #ffd9e7;
+    font-size: 0.5rem;
+    opacity: 0.72;
+    animation: diamondBlink 2.2s ease-in-out infinite;
+}
+
+.hero-kicker::before {
+    left: -1.1rem;
+}
+
+.hero-kicker::after {
+    right: -1.1rem;
+    animation-delay: 0.9s;
 }
 
 .hero-subtitle {
@@ -365,7 +415,28 @@ p {
     gap: 0.9rem;
 }
 
+.memory-timeline {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    gap: 1.2rem;
+    padding: 0.35rem 0;
+}
+
+.memory-timeline::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    left: 50%;
+    width: 2px;
+    transform: translateX(-50%);
+    background: linear-gradient(to bottom, rgba(255, 226, 235, 0.2), rgba(255, 186, 206, 0.9), rgba(255, 226, 235, 0.2));
+    animation: timelineGlow 3.4s ease-in-out infinite;
+}
+
 .memory-card {
+    position: relative;
     background: rgba(255, 245, 247, 0.1);
     border: 1px solid rgba(255, 255, 255, 0.28);
     border-radius: 1rem;
@@ -373,11 +444,59 @@ p {
     box-shadow: var(--shadow);
     transition: transform 0.35s ease, box-shadow 0.35s ease;
     cursor: pointer;
+    width: calc(50% - 1.45rem);
 }
 
 .memory-card:hover {
     transform: translateY(-5px) scale(1.01);
     box-shadow: 0 20px 35px rgba(0, 0, 0, 0.45);
+}
+
+.memory-card::before {
+    content: "";
+    position: absolute;
+    top: 1.35rem;
+    width: 12px;
+    height: 12px;
+    background: linear-gradient(140deg, #fff6fb, #ffc7da);
+    border: 1px solid rgba(255, 255, 255, 0.45);
+    transform: rotate(45deg);
+    box-shadow: 0 0 14px rgba(255, 198, 219, 0.75);
+    z-index: 3;
+    animation: diamondPulse 2.4s ease-in-out infinite;
+}
+
+.memory-card::after {
+    content: "";
+    position: absolute;
+    inset: -110% auto auto -45%;
+    width: 40%;
+    height: 260%;
+    background: linear-gradient(
+        110deg,
+        rgba(255, 255, 255, 0) 0%,
+        rgba(255, 255, 255, 0.2) 46%,
+        rgba(255, 255, 255, 0) 100%
+    );
+    transform: rotate(18deg);
+    animation: memoryShine 4.4s ease-in-out infinite;
+    pointer-events: none;
+}
+
+.memory-timeline .memory-card:nth-child(odd) {
+    margin-right: auto;
+}
+
+.memory-timeline .memory-card:nth-child(odd)::before {
+    right: -1.7rem;
+}
+
+.memory-timeline .memory-card:nth-child(even) {
+    margin-left: auto;
+}
+
+.memory-timeline .memory-card:nth-child(even)::before {
+    left: -1.7rem;
 }
 
 .memory-card:focus-visible {
@@ -422,6 +541,14 @@ p {
 
 .memory-content {
     padding: 0.95rem 1rem 1.1rem;
+}
+
+.memory-date {
+    margin: 0 0 0.35rem;
+    color: #ffd6e3;
+    font-size: 0.73rem;
+    letter-spacing: 0.09em;
+    text-transform: uppercase;
 }
 
 .memory-content h3 {
@@ -527,6 +654,8 @@ input[type="password"]::placeholder {
 
 .itinerary-modal-card {
     width: min(94vw, 640px);
+    max-height: 88vh;
+    overflow-y: auto;
     border-radius: 1rem;
     border: 1px solid rgba(255, 255, 255, 0.3);
     background: linear-gradient(145deg, rgba(255, 245, 247, 0.2), rgba(24, 10, 19, 0.85));
@@ -581,31 +710,135 @@ input[type="password"]::placeholder {
 
 .itinerary-program {
     margin-top: 0.95rem;
-    display: grid;
-    grid-template-columns: repeat(3, minmax(0, 1fr));
-    gap: 0.55rem;
 }
 
-.program-block {
+.timeline-heading {
+    margin: 0 0 0.55rem;
+    color: #ffdbe5;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    font-size: 0.8rem;
+}
+
+.event-timeline {
+    list-style: none;
+    margin: 0;
+    padding: 0 0.35rem 0 0.85rem;
+    position: relative;
+    max-height: 210px;
+    overflow-y: auto;
+    border-left: 2px solid rgba(255, 190, 214, 0.78);
+    box-shadow: -1px 0 8px rgba(255, 190, 214, 0.28);
+}
+
+.event-timeline::-webkit-scrollbar,
+.itinerary-modal-card::-webkit-scrollbar {
+    width: 8px;
+}
+
+.event-timeline::-webkit-scrollbar-track,
+.itinerary-modal-card::-webkit-scrollbar-track {
+    background: rgba(255, 255, 255, 0.08);
+    border-radius: 999px;
+}
+
+.event-timeline::-webkit-scrollbar-thumb,
+.itinerary-modal-card::-webkit-scrollbar-thumb {
+    background: rgba(255, 196, 217, 0.6);
+    border-radius: 999px;
+}
+
+.event-timeline::-webkit-scrollbar-thumb:hover,
+.itinerary-modal-card::-webkit-scrollbar-thumb:hover {
+    background: rgba(255, 196, 217, 0.85);
+}
+
+.timeline-row {
+    position: relative;
+    display: grid;
+    grid-template-columns: 88px 1fr;
+    gap: 0.55rem;
+    align-items: start;
     border: 1px solid rgba(255, 255, 255, 0.22);
     border-radius: 0.8rem;
     background: rgba(255, 255, 255, 0.08);
-    padding: 0.6rem 0.65rem;
+    padding: 0.5rem 0.55rem;
+    margin-top: 0.5rem;
+    margin-bottom: 0.5rem;
 }
 
-.program-block h4 {
-    margin: 0 0 0.3rem;
-    font-size: 0.86rem;
-    color: #ffdbe5;
-    letter-spacing: 0.05em;
+.timeline-row::before {
+    content: "";
+    position: absolute;
+    left: -0.68rem;
+    top: 0.85rem;
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    background: #ffd9e7;
+    box-shadow: 0 0 0 2px rgba(255, 205, 223, 0.35), 0 0 10px rgba(255, 205, 223, 0.55);
+}
+
+.timeline-time {
+    font-size: 0.76rem;
+    letter-spacing: 0.07em;
+    color: #ffdce8;
     text-transform: uppercase;
+    font-weight: 700;
+    padding-top: 0.15rem;
 }
 
-.program-block p {
+.timeline-body {
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+}
+
+.timeline-category {
+    align-self: flex-start;
+    border-radius: 999px;
+    padding: 0.2rem 0.5rem;
+    font-size: 0.7rem;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    border: 1px solid rgba(255, 255, 255, 0.24);
+}
+
+.timeline-category::before {
+    margin-right: 0.28rem;
+}
+
+.timeline-category.games {
+    background: rgba(255, 170, 195, 0.16);
+    color: #ffd7e5;
+}
+
+.timeline-category.games::before {
+    content: "♟";
+}
+
+.timeline-category.food {
+    background: rgba(255, 207, 159, 0.18);
+    color: #ffe3c6;
+}
+
+.timeline-category.food::before {
+    content: "◔";
+}
+
+.timeline-category.performances {
+    background: rgba(208, 186, 255, 0.18);
+    color: #eadcff;
+}
+
+.timeline-category.performances::before {
+    content: "♪";
+}
+
+.timeline-title {
     margin: 0;
-    color: #ffecf1;
-    font-size: 0.86rem;
-    line-height: 1.5;
+    font-size: 0.9rem;
+    color: #ffebf1;
 }
 
 .itinerary-details {
@@ -737,9 +970,124 @@ input[type="password"]::placeholder {
     }
 }
 
+@keyframes heroDiamondShine {
+    0%,
+    100% {
+        text-shadow: 0 8px 35px rgba(0, 0, 0, 0.38), 0 0 0 rgba(255, 210, 228, 0);
+        filter: drop-shadow(0 0 0 rgba(255, 214, 231, 0));
+    }
+    50% {
+        text-shadow: 0 8px 35px rgba(0, 0, 0, 0.34), 0 0 24px rgba(255, 213, 230, 0.75);
+        filter: drop-shadow(0 0 8px rgba(255, 220, 235, 0.55));
+    }
+}
+
+@keyframes heroTextSweep {
+    0% {
+        left: -28%;
+        opacity: 0;
+    }
+    10% {
+        opacity: 1;
+    }
+    44% {
+        left: 112%;
+        opacity: 0;
+    }
+    100% {
+        left: 112%;
+        opacity: 0;
+    }
+}
+
+@keyframes diamondBlink {
+    0%,
+    100% {
+        opacity: 0.55;
+        transform: translateY(-50%) scale(0.9);
+        text-shadow: 0 0 0 rgba(255, 214, 231, 0);
+    }
+    50% {
+        opacity: 1;
+        transform: translateY(-50%) scale(1.12);
+        text-shadow: 0 0 12px rgba(255, 214, 231, 0.85);
+    }
+}
+
+@keyframes kickerSparkle {
+    0%,
+    100% {
+        letter-spacing: 0.18em;
+        text-shadow: 0 0 0 rgba(255, 212, 230, 0);
+    }
+    50% {
+        letter-spacing: 0.2em;
+        text-shadow: 0 0 8px rgba(255, 212, 230, 0.72);
+    }
+}
+
+@keyframes timelineGlow {
+    0%,
+    100% {
+        filter: drop-shadow(0 0 0 rgba(255, 205, 223, 0));
+        opacity: 0.85;
+    }
+    50% {
+        filter: drop-shadow(0 0 9px rgba(255, 206, 224, 0.75));
+        opacity: 1;
+    }
+}
+
+@keyframes diamondPulse {
+    0%,
+    100% {
+        transform: rotate(45deg) scale(1);
+        box-shadow: 0 0 8px rgba(255, 198, 219, 0.45);
+    }
+    50% {
+        transform: rotate(45deg) scale(1.1);
+        box-shadow: 0 0 16px rgba(255, 198, 219, 0.85);
+    }
+}
+
+@keyframes memoryShine {
+    0% {
+        transform: translateX(0) rotate(18deg);
+        opacity: 0;
+    }
+    14% {
+        opacity: 1;
+    }
+    45% {
+        transform: translateX(320%) rotate(18deg);
+        opacity: 0;
+    }
+    100% {
+        transform: translateX(320%) rotate(18deg);
+        opacity: 0;
+    }
+}
+
 @media (max-width: 860px) {
     .memory-grid {
         grid-template-columns: 1fr;
+    }
+
+    .memory-timeline::before {
+        left: 10px;
+        transform: none;
+    }
+
+    .memory-card {
+        width: calc(100% - 1.45rem);
+        margin-left: auto !important;
+    }
+
+    .memory-card::before,
+    .memory-timeline .memory-card:nth-child(even)::before,
+    .memory-timeline .memory-card:nth-child(odd)::before {
+        left: -1.15rem;
+        right: auto;
     }
 
     .countdown-grid {
@@ -750,8 +1098,8 @@ input[type="password"]::placeholder {
         grid-template-columns: 1fr;
     }
 
-    .itinerary-program {
-        grid-template-columns: 1fr;
+    .timeline-row {
+        grid-template-columns: 76px 1fr;
     }
 
     .top-nav {
