@@ -17,13 +17,35 @@ const secretInput = document.getElementById("secretInput");
 const secretMessage = document.getElementById("secretMessage");
 
 const memoryCards = Array.from(document.querySelectorAll(".memory-card"));
+const itineraryItems = Array.from(document.querySelectorAll(".itinerary-item"));
 const lightbox = document.getElementById("memoryLightbox");
 const lightboxImage = document.getElementById("lightboxImage");
+const lightboxVideo = document.getElementById("lightboxVideo");
 const lightboxCaption = document.getElementById("lightboxCaption");
 const lightboxClose = document.getElementById("lightboxClose");
+const itineraryModal = document.getElementById("itineraryModal");
+const itineraryClose = document.getElementById("itineraryClose");
+const itineraryTag = document.getElementById("itineraryTag");
+const itineraryTitle = document.getElementById("itineraryTitle");
+const itineraryDate = document.getElementById("itineraryDate");
+const itineraryTime = document.getElementById("itineraryTime");
+const itineraryGuestTime = document.getElementById("itineraryGuestTime");
+const itineraryLocation = document.getElementById("itineraryLocation");
+const itineraryUploadLink = document.getElementById("itineraryUploadLink");
+const itineraryMapLink = document.getElementById("itineraryMapLink");
+const itineraryMap = document.getElementById("itineraryMap");
+const itineraryGames = document.getElementById("itineraryGames");
+const itineraryFood = document.getElementById("itineraryFood");
+const itineraryPerformances = document.getElementById("itineraryPerformances");
+const itineraryDetails = document.getElementById("itineraryDetails");
 const bgMusic = document.getElementById("bgMusic");
 const musicToggleBtn = document.getElementById("musicToggleBtn");
 const musicStatus = document.getElementById("musicStatus");
+
+function syncModalBodyLock() {
+    const hasOpenModal = Boolean(document.querySelector(".lightbox.open"));
+    document.body.classList.toggle("modal-open", hasOpenModal);
+}
 
 function formatDuration(ms) {
     const totalSeconds = Math.floor(ms / 1000);
@@ -90,6 +112,10 @@ function unlockLoveLetter() {
 
 function setupRevealAnimations() {
     const revealElements = Array.from(document.querySelectorAll(".reveal"));
+    revealElements.forEach((el, index) => {
+        const staggerIndex = el.classList.contains("memory-card") ? index % 4 : index % 6;
+        el.style.transitionDelay = `${staggerIndex * 70}ms`;
+    });
 
     if (!("IntersectionObserver" in window)) {
         revealElements.forEach((el) => el.classList.add("visible"));
@@ -111,33 +137,82 @@ function setupRevealAnimations() {
     revealElements.forEach((el) => observer.observe(el));
 }
 
-function openLightbox(src, alt, caption) {
-    lightboxImage.src = src;
-    lightboxImage.alt = alt || "Full memory image";
+function getYouTubeEmbedUrl(url) {
+    if (!url) return null;
+
+    try {
+        const parsed = new URL(url);
+        const host = parsed.hostname.replace(/^www\./, "");
+        let videoId = "";
+
+        if (host === "youtu.be") {
+            videoId = parsed.pathname.slice(1);
+        } else if (host === "youtube.com" || host === "m.youtube.com") {
+            if (parsed.pathname === "/watch") {
+                videoId = parsed.searchParams.get("v") || "";
+            } else if (parsed.pathname.startsWith("/shorts/")) {
+                videoId = parsed.pathname.split("/")[2] || "";
+            } else if (parsed.pathname.startsWith("/embed/")) {
+                videoId = parsed.pathname.split("/")[2] || "";
+            }
+        }
+
+        if (!videoId) return null;
+        return `https://www.youtube.com/embed/${videoId}?autoplay=1&rel=0`;
+    } catch (error) {
+        return null;
+    }
+}
+
+function openLightbox({ src, alt, caption, videoEmbed }) {
+    if (videoEmbed) {
+        lightboxImage.style.display = "none";
+        lightboxVideo.style.display = "block";
+        lightboxVideo.src = videoEmbed;
+    } else {
+        lightboxVideo.style.display = "none";
+        lightboxVideo.src = "";
+        lightboxImage.style.display = "block";
+        lightboxImage.src = src;
+        lightboxImage.alt = alt || "Full memory image";
+    }
+
     lightboxCaption.textContent = caption;
     lightbox.classList.add("open");
     lightbox.setAttribute("aria-hidden", "false");
-    document.body.classList.add("modal-open");
+    syncModalBodyLock();
 }
 
 function closeLightbox() {
     lightbox.classList.remove("open");
     lightbox.setAttribute("aria-hidden", "true");
-    document.body.classList.remove("modal-open");
+    lightboxVideo.src = "";
+    syncModalBodyLock();
 }
 
 function setupMemoryLightbox() {
     memoryCards.forEach((card) => {
-        const image = card.querySelector("img");
+        const image = card.querySelector(".memory-media img, img");
         const title = card.querySelector("h3")?.textContent?.trim() || "Memory";
         const description = card.querySelector("p")?.textContent?.trim() || "";
         const caption = description ? `${title}: ${description}` : title;
+        const videoUrl = card.dataset.video || "";
+        const videoEmbed = getYouTubeEmbedUrl(videoUrl);
 
         card.setAttribute("role", "button");
         card.setAttribute("tabindex", "0");
-        card.setAttribute("aria-label", `Open ${title} memory`);
+        card.setAttribute(
+            "aria-label",
+            videoEmbed ? `Open ${title} video memory` : `Open ${title} memory`
+        );
 
-        const openCardLightbox = () => openLightbox(image.src, image.alt, caption);
+        const openCardLightbox = () =>
+            openLightbox({
+                src: image?.src || "",
+                alt: image?.alt || "Full memory image",
+                caption,
+                videoEmbed
+            });
 
         card.addEventListener("click", openCardLightbox);
         card.addEventListener("keydown", (event) => {
@@ -158,6 +233,68 @@ function setupMemoryLightbox() {
     document.addEventListener("keydown", (event) => {
         if (event.key === "Escape" && lightbox.classList.contains("open")) {
             closeLightbox();
+        }
+    });
+}
+
+function openItineraryModal(item) {
+    const mapQuery = item.dataset.mapQuery || item.dataset.location || "";
+    const mapEmbed = `https://www.google.com/maps?q=${encodeURIComponent(mapQuery)}&output=embed`;
+    const mapOpen = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(mapQuery)}`;
+    const uploadLink = item.dataset.upload || "#";
+
+    itineraryTag.textContent = "Wedding Event";
+    itineraryTitle.textContent = item.dataset.event || "Event Details";
+    itineraryDate.textContent = item.dataset.date || "To be announced";
+    itineraryTime.textContent = item.dataset.time || "To be announced";
+    itineraryGuestTime.textContent = item.dataset.guestTime || "Please arrive 45 mins early";
+    itineraryLocation.textContent = item.dataset.location || "To be announced";
+    itineraryUploadLink.href = uploadLink;
+    itineraryMapLink.href = mapOpen;
+    itineraryMap.src = mapEmbed;
+    itineraryGames.textContent = item.dataset.games || "To be announced";
+    itineraryFood.textContent = item.dataset.food || "To be announced";
+    itineraryPerformances.textContent = item.dataset.performances || "To be announced";
+    itineraryDetails.textContent = item.dataset.details || "";
+
+    itineraryModal.classList.add("open");
+    itineraryModal.setAttribute("aria-hidden", "false");
+    syncModalBodyLock();
+}
+
+function closeItineraryModal() {
+    itineraryModal.classList.remove("open");
+    itineraryModal.setAttribute("aria-hidden", "true");
+    itineraryMap.src = "";
+    syncModalBodyLock();
+}
+
+function setupWeddingItinerary() {
+    if (!itineraryItems.length || !itineraryModal || !itineraryClose) return;
+
+    itineraryItems.forEach((item) => {
+        const openDetails = () => openItineraryModal(item);
+
+        item.addEventListener("click", openDetails);
+        item.addEventListener("keydown", (event) => {
+            if (event.key === "Enter" || event.key === " ") {
+                event.preventDefault();
+                openDetails();
+            }
+        });
+    });
+
+    itineraryClose.addEventListener("click", closeItineraryModal);
+
+    itineraryModal.addEventListener("click", (event) => {
+        if (event.target === itineraryModal) {
+            closeItineraryModal();
+        }
+    });
+
+    document.addEventListener("keydown", (event) => {
+        if (event.key === "Escape" && itineraryModal.classList.contains("open")) {
+            closeItineraryModal();
         }
     });
 }
@@ -202,6 +339,7 @@ bindTabs();
 activateTab("home");
 setupRevealAnimations();
 setupMemoryLightbox();
+setupWeddingItinerary();
 setupBackgroundMusic();
 updateTimers();
 setInterval(updateTimers, 1000);

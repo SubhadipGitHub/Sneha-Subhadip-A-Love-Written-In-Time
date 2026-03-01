@@ -22,7 +22,7 @@
 
     <nav class="top-nav reveal" aria-label="Main Sections">
         <button id="home-tab" class="tab-btn active" data-tab="home">Home</button>
-        <button id="countdown-tab" class="tab-btn" data-tab="countdown">Wedding Countdown</button>
+        <button id="countdown-tab" class="tab-btn" data-tab="countdown">Wedding</button>
         <button id="memories-tab" class="tab-btn" data-tab="memories">Memory Gallery</button>
         <button id="letter-tab" class="tab-btn" data-tab="letter">Secret Letter</button>
     </nav>
@@ -30,6 +30,13 @@
     <main class="tab-shell">
         <section id="home" class="tab-panel active reveal" aria-labelledby="home-tab">
             <div class="glass-card centered">
+                <figure class="timer-cover reveal">
+                    <img src="https://www.shutterstock.com/image-vector/couple-holding-hands-front-glowing-600nw-2565737961.jpg" alt="Sneha and Subhadip romantic cover moment">
+                    <figcaption>
+                        <p class="cover-kicker">Since March 1, 2025</p>
+                        <p class="cover-title">Our Time Together</p>
+                    </figcaption>
+                </figure>
                 <h2>Our Story</h2>
                 <p>
                     We started on <strong>March 1, 2025</strong>. Since then, every trip, laugh, sunset,
@@ -44,6 +51,13 @@
 
         <section id="countdown" class="tab-panel reveal" aria-labelledby="countdown-tab">
             <div class="glass-card centered">
+                <figure class="timer-cover reveal">
+                    <img src="https://media.easy-peasy.ai/247c4b79-5d92-431f-a40e-a07751b5bb15/9399decc-8a06-4970-bd53-696106c6b935.png" alt="Sneha and Subhadip engagement cover">
+                    <figcaption>
+                        <p class="cover-kicker">December 11, 2026</p>
+                        <p class="cover-title">Countdown To Our Wedding</p>
+                    </figcaption>
+                </figure>
                 <h2>Wedding Countdown</h2>
                 <p class="date-line">December 11, 2026</p>
                 <div class="countdown-grid" id="weddingCountdown" aria-live="polite">
@@ -65,6 +79,94 @@
                     </div>
                 </div>
                 <p id="countdownStatus" class="countdown-status"></p>
+            </div>
+
+            <div class="glass-card itinerary-shell reveal">
+                <div class="section-head centered">
+                    <h2>Wedding Itinerary</h2>
+                    <p>Tap any event to view date, time, venue, and special notes.</p>
+                </div>
+                <div class="itinerary-grid">
+                    <button
+                        type="button"
+                        class="itinerary-item reveal"
+                        data-event="Sangeet Night"
+                        data-date="December 10, 2026"
+                        data-time="7:00 PM onwards"
+                        data-guest-time="6:15 PM"
+                        data-location="Regenta Orkos Hotel, Kolkata"
+                        data-details="Music, dance, and family performances to begin the celebration."
+                        data-upload="https://forms.gle/CRVTtRNku7sTBYiG6"
+                        data-map-query="Regenta Orkos Hotel, Kolkata"
+                        data-games="7:10 PM - Couple Quiz, 7:45 PM - Family Dance Battle"
+                        data-food="8:30 PM - Live Chaat Counters, 9:00 PM - Dinner Buffet"
+                        data-performances="7:30 PM - Friends Medley, 8:00 PM - Family Performances"
+                    >
+                        <span class="itinerary-day">Dec 10</span>
+                        <h3>Sangeet</h3>
+                        <p>Music and dance evening</p>
+                    </button>
+
+                    <button
+                        type="button"
+                        class="itinerary-item reveal"
+                        data-event="Haldi Ceremony"
+                        data-date="December 11, 2026"
+                        data-time="10:30 AM onwards"
+                        data-guest-time="10:00 AM"
+                        data-location="Regenta Orkos Hotel, Kolkata"
+                        data-details="A bright morning with marigolds, turmeric rituals, and laughter."
+                        data-upload="https://forms.gle/CRVTtRNku7sTBYiG6"
+                        data-map-query="Regenta Orkos Hotel, Kolkata"
+                        data-games="11:15 AM - Floral Ring Toss, 11:45 AM - Team Trivia"
+                        data-food="12:30 PM - Traditional Lunch Service"
+                        data-performances="10:45 AM - Dhol Entry, 12:00 PM - Cousins Performance"
+                    >
+                        <span class="itinerary-day">Dec 11</span>
+                        <h3>Haldi</h3>
+                        <p>Colorful ritual celebration</p>
+                    </button>
+
+                    <button
+                        type="button"
+                        class="itinerary-item reveal"
+                        data-event="Wedding Ceremony"
+                        data-date="December 11, 2026"
+                        data-time="7:45 PM muhurat"
+                        data-guest-time="8:45 PM"
+                        data-location="Regenta Orkos Hotel, Kolkata"
+                        data-details="The sacred wedding ceremony where we begin our forever."
+                        data-upload="https://forms.gle/CRVTtRNku7sTBYiG6"
+                        data-map-query="Regenta Orkos Hotel, Kolkata"
+                        data-games="8:50 PM - Welcome Photo Challenge"
+                        data-food="9:15 PM - Dinner Service Begins"
+                        data-performances="9:00 PM - Shehnai Ensemble, 10:30 PM - Couple Entry"
+                    >
+                        <span class="itinerary-day">Dec 11</span>
+                        <h3>Wedding</h3>
+                        <p>The vows and the forever promise</p>
+                    </button>
+
+                    <button
+                        type="button"
+                        class="itinerary-item reveal"
+                        data-event="Reception Evening"
+                        data-date="December 13, 2026"
+                        data-time="8:30 PM onwards"
+                        data-guest-time="7:45 PM"
+                        data-location="Princeton Club, Kolkata"
+                        data-details="A celebratory evening dinner with family, friends, and blessings."
+                        data-upload="https://forms.gle/CRVTtRNku7sTBYiG6"
+                        data-map-query="Princeton Club, Kolkata"
+                        data-games="7:45 PM - Guess The Couple Story, 9:20 PM - Lucky Draw"
+                        data-food="8:45 PM - Live Grill Stations, 10:15 PM - Main Course Buffet"
+                        data-performances="9:00 PM - Friends Dance Set, 9:35 PM - Live Band"
+                    >
+                        <span class="itinerary-day">Dec 13</span>
+                        <h3>Reception</h3>
+                        <p>Grand celebration with everyone</p>
+                    </button>
+                </div>
             </div>
         </section>
 
@@ -145,6 +247,26 @@
                         <p>Candlelight, music, and heartbeats perfectly in sync.</p>
                     </div>
                 </article>
+                <article class="memory-card video-card reveal" data-video="https://www.youtube.com/watch?v=ScMzIvxBSi4">
+                    <div class="memory-media">
+                        <img src="images/new_year.png" alt="Cover image for New Year celebration video">
+                        <span class="video-badge" aria-hidden="true">Play</span>
+                    </div>
+                    <div class="memory-content">
+                        <h3>New Year Video</h3>
+                        <p>A moving memory from our New Year celebration.</p>
+                    </div>
+                </article>
+                <article class="memory-card video-card reveal" data-video="https://www.youtube.com/watch?v=aqz-KE-bpKQ">
+                    <div class="memory-media">
+                        <img src="images/ooty.jpg" alt="Cover image for Ooty trip video">
+                        <span class="video-badge" aria-hidden="true">Play</span>
+                    </div>
+                    <div class="memory-content">
+                        <h3>Ooty Video</h3>
+                        <p>A short video memory from our Ooty chapter.</p>
+                    </div>
+                </article>
             </div>
         </section>
 
@@ -165,8 +287,57 @@
         <button id="lightboxClose" class="lightbox-close" aria-label="Close popup">&times;</button>
         <figure class="lightbox-figure">
             <img id="lightboxImage" src="" alt="Full memory image">
+            <iframe
+                id="lightboxVideo"
+                src=""
+                title="Memory video player"
+                loading="lazy"
+                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                referrerpolicy="strict-origin-when-cross-origin"
+                allowfullscreen
+            ></iframe>
             <figcaption id="lightboxCaption"></figcaption>
         </figure>
+    </div>
+
+    <div id="itineraryModal" class="lightbox itinerary-modal" aria-hidden="true" role="dialog" aria-label="Wedding event details">
+        <button id="itineraryClose" class="lightbox-close" aria-label="Close event popup">&times;</button>
+        <article class="itinerary-modal-card">
+            <p id="itineraryTag" class="itinerary-tag">Event</p>
+            <h3 id="itineraryTitle">Wedding Event</h3>
+            <div class="itinerary-meta">
+                <p><strong>Date:</strong> <span id="itineraryDate"></span></p>
+                <p><strong>Time:</strong> <span id="itineraryTime"></span></p>
+                <p><strong>Guest Reporting Time:</strong> <span id="itineraryGuestTime"></span></p>
+                <p><strong>Location:</strong> <span id="itineraryLocation"></span></p>
+            </div>
+            <div class="itinerary-links">
+                <a id="itineraryUploadLink" class="primary-btn itinerary-link-btn" href="#" target="_blank" rel="noopener noreferrer">Upload Photos/Videos</a>
+                <a id="itineraryMapLink" class="primary-btn itinerary-link-btn" href="#" target="_blank" rel="noopener noreferrer">Open In Google Maps</a>
+            </div>
+            <iframe
+                id="itineraryMap"
+                title="Event location map"
+                loading="lazy"
+                referrerpolicy="no-referrer-when-downgrade"
+                src=""
+            ></iframe>
+            <div class="itinerary-program">
+                <div class="program-block">
+                    <h4>Games</h4>
+                    <p id="itineraryGames"></p>
+                </div>
+                <div class="program-block">
+                    <h4>Food</h4>
+                    <p id="itineraryFood"></p>
+                </div>
+                <div class="program-block">
+                    <h4>Performances</h4>
+                    <p id="itineraryPerformances"></p>
+                </div>
+            </div>
+            <p id="itineraryDetails" class="itinerary-details"></p>
+        </article>
     </div>
 
     <audio id="bgMusic" loop preload="auto">
