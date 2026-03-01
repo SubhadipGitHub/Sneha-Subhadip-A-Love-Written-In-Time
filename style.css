@@ -1,44 +1,409 @@
+:root {
+    --bg-1: #1a0f16;
+    --bg-2: #2f1b2d;
+    --bg-3: #6a2e42;
+    --glass: rgba(255, 245, 247, 0.14);
+    --border: rgba(255, 255, 255, 0.34);
+    --text: #fff4f6;
+    --muted: #f6d4dc;
+    --accent: #ff8ea8;
+    --accent-strong: #ff5f86;
+    --shadow: 0 18px 50px rgba(0, 0, 0, 0.35);
+}
+
+* {
+    box-sizing: border-box;
+}
+
 body {
     margin: 0;
-    font-family: 'Georgia', serif;
-    background: linear-gradient(135deg, #fbc2eb, #a6c1ee);
-    height: 100vh;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    overflow: hidden;
+    min-height: 100vh;
+    color: var(--text);
+    font-family: "Manrope", sans-serif;
+    background: radial-gradient(circle at 25% 15%, #7f3b4f 0%, transparent 38%),
+        radial-gradient(circle at 80% 5%, #60335b 0%, transparent 34%),
+        linear-gradient(140deg, var(--bg-1), var(--bg-2) 55%, var(--bg-3));
+    overflow-x: hidden;
 }
 
-.overlay {
+.cinema-bg,
+.film-grain {
+    position: fixed;
+    inset: 0;
+    pointer-events: none;
+    z-index: -2;
+}
+
+.cinema-bg::before,
+.cinema-bg::after {
+    content: "";
+    position: absolute;
+    border-radius: 50%;
+    filter: blur(120px);
+    opacity: 0.35;
+    animation: drift 14s ease-in-out infinite alternate;
+}
+
+.cinema-bg::before {
+    width: 28rem;
+    height: 28rem;
+    background: #ff7894;
+    top: -8rem;
+    left: -3rem;
+}
+
+.cinema-bg::after {
+    width: 22rem;
+    height: 22rem;
+    background: #ffc0a8;
+    right: -4rem;
+    bottom: -5rem;
+    animation-delay: 2s;
+}
+
+.film-grain {
+    background-image: radial-gradient(rgba(255, 255, 255, 0.045) 1px, transparent 1px);
+    background-size: 3px 3px;
+    mix-blend-mode: soft-light;
+    opacity: 0.4;
+    z-index: -1;
+}
+
+.hero {
+    padding: 2.2rem 1rem 1rem;
     text-align: center;
-    color: white;
-    backdrop-filter: blur(15px);
-    padding: 40px;
-    border-radius: 25px;
-    background: rgba(255,255,255,0.15);
 }
 
-#timer {
-    font-size: 22px;
-    margin: 20px 0;
+.hero-kicker {
+    margin: 0;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    font-size: 0.73rem;
+    color: var(--muted);
 }
 
-button {
-    margin: 6px;
-    padding: 8px 14px;
-    border-radius: 20px;
-    border: none;
+.hero h1 {
+    margin: 0.45rem 0 0.3rem;
+    font-family: "Cinzel", serif;
+    font-size: clamp(2rem, 6vw, 4rem);
+    font-weight: 700;
+    text-shadow: 0 8px 35px rgba(0, 0, 0, 0.38);
+}
+
+.hero h1 span {
+    color: #ffdce4;
+}
+
+.hero-subtitle {
+    margin: 0;
+    font-size: 1rem;
+    color: var(--muted);
+}
+
+.top-nav {
+    position: sticky;
+    top: 0.75rem;
+    z-index: 10;
+    margin: 1rem auto 1.3rem;
+    width: min(1100px, calc(100% - 1.5rem));
+    display: flex;
+    gap: 0.6rem;
+    flex-wrap: wrap;
+    justify-content: center;
+    padding: 0.65rem;
+    border-radius: 999px;
+    backdrop-filter: blur(12px);
+    background: rgba(18, 9, 13, 0.55);
+    border: 1px solid rgba(255, 255, 255, 0.22);
+    box-shadow: var(--shadow);
+}
+
+.tab-btn {
+    border: 1px solid rgba(255, 255, 255, 0.22);
+    border-radius: 999px;
+    background: rgba(255, 255, 255, 0.08);
+    color: var(--text);
+    padding: 0.65rem 1rem;
+    font-size: 0.95rem;
     cursor: pointer;
-    background: rgba(255,255,255,0.3);
-    color: white;
+    transition: transform 0.25s ease, background 0.3s ease, border-color 0.3s ease;
 }
 
-.memory-text {
-    margin-top: 20px;
-    font-style: italic;
+.tab-btn:hover,
+.tab-btn:focus-visible {
+    transform: translateY(-1px);
+    background: rgba(255, 255, 255, 0.15);
+    outline: none;
 }
 
-.secret {
-    margin-top: 20px;
-    font-weight: bold;
+.tab-btn.active {
+    background: linear-gradient(125deg, var(--accent-strong), #f17f72);
+    border-color: transparent;
+    color: #fff;
+}
+
+.tab-shell {
+    width: min(1100px, calc(100% - 1.5rem));
+    margin: 0 auto 2.5rem;
+}
+
+.tab-panel {
+    display: none;
+    animation: fadeIn 0.55s ease;
+}
+
+.tab-panel.active {
+    display: block;
+}
+
+.glass-card {
+    background: var(--glass);
+    border: 1px solid var(--border);
+    border-radius: 1.2rem;
+    padding: clamp(1.15rem, 2vw, 2rem);
+    box-shadow: var(--shadow);
+    backdrop-filter: blur(10px);
+}
+
+.centered {
+    text-align: center;
+}
+
+h2 {
+    margin-top: 0;
+    font-family: "Cinzel", serif;
+    font-size: clamp(1.45rem, 4vw, 2.1rem);
+}
+
+p {
+    line-height: 1.65;
+}
+
+.together-wrap {
+    margin-top: 1.4rem;
+}
+
+.label {
+    margin-bottom: 0.35rem;
+    color: var(--muted);
+    font-size: 0.9rem;
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+}
+
+.live-timer {
+    font-size: clamp(1rem, 3.4vw, 1.45rem);
+    font-weight: 700;
+    letter-spacing: 0.02em;
+}
+
+.date-line {
+    margin: 0.1rem 0 1rem;
+    font-size: clamp(1rem, 3.5vw, 1.25rem);
+    color: #ffe0e8;
+}
+
+.countdown-grid {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 0.65rem;
+}
+
+.count-box {
+    background: rgba(11, 4, 9, 0.36);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    border-radius: 0.95rem;
+    padding: 0.9rem 0.5rem;
+}
+
+.count-box span {
+    display: block;
+    font-size: clamp(1.2rem, 4vw, 2.1rem);
+    font-weight: 700;
+}
+
+.count-box small {
+    color: var(--muted);
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    font-size: 0.72rem;
+}
+
+.countdown-status {
+    margin-top: 0.9rem;
+    font-weight: 600;
+    color: #ffe3da;
+}
+
+.section-head {
+    margin-bottom: 1rem;
+}
+
+.section-head p {
+    margin-top: 0;
+    color: var(--muted);
+}
+
+.memory-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 0.9rem;
+}
+
+.memory-card {
+    background: rgba(255, 245, 247, 0.1);
+    border: 1px solid rgba(255, 255, 255, 0.28);
+    border-radius: 1rem;
+    overflow: hidden;
+    box-shadow: var(--shadow);
+    transition: transform 0.35s ease, box-shadow 0.35s ease;
+}
+
+.memory-card:hover {
+    transform: translateY(-5px) scale(1.01);
+    box-shadow: 0 20px 35px rgba(0, 0, 0, 0.45);
+}
+
+.memory-card img {
+    width: 100%;
+    height: 215px;
+    object-fit: cover;
+    display: block;
+}
+
+.memory-content {
+    padding: 0.95rem 1rem 1.1rem;
+}
+
+.memory-content h3 {
+    margin: 0;
+    font-family: "Cinzel", serif;
+}
+
+.memory-content p {
+    margin-bottom: 0;
+    margin-top: 0.5rem;
+    color: #ffebef;
+}
+
+.letter-card {
+    max-width: 680px;
+    margin: 0 auto;
+}
+
+.unlock-row {
+    margin-top: 0.5rem;
+    display: flex;
+    gap: 0.65rem;
+    flex-wrap: wrap;
+    justify-content: center;
+}
+
+input[type="password"] {
+    border: 1px solid rgba(255, 255, 255, 0.28);
+    background: rgba(7, 3, 6, 0.38);
+    color: var(--text);
+    border-radius: 0.7rem;
+    padding: 0.7rem 0.9rem;
+    min-width: min(290px, 100%);
+}
+
+input[type="password"]::placeholder {
+    color: #eac8d1;
+}
+
+.primary-btn {
+    border: none;
+    border-radius: 0.7rem;
+    padding: 0.72rem 1rem;
+    background: linear-gradient(130deg, var(--accent-strong), #ec8f74);
+    color: #fff;
+    cursor: pointer;
+    font-weight: 700;
+}
+
+.secret-message {
+    min-height: 2rem;
+    margin-top: 1rem;
+    color: #ffe4eb;
+    font-weight: 600;
+}
+
+.reveal {
+    opacity: 0;
+    transform: translateY(16px);
+    transition: opacity 0.7s ease, transform 0.7s ease;
+}
+
+.reveal.visible {
+    opacity: 1;
+    transform: translateY(0);
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@keyframes drift {
+    from {
+        transform: translate3d(0, 0, 0) scale(1);
+    }
+    to {
+        transform: translate3d(10px, -18px, 0) scale(1.08);
+    }
+}
+
+@media (max-width: 860px) {
+    .memory-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .countdown-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    .top-nav {
+        border-radius: 1rem;
+        top: 0.5rem;
+    }
+}
+
+@media (max-width: 520px) {
+    .hero {
+        padding-top: 1.4rem;
+    }
+
+    .tab-shell,
+    .top-nav {
+        width: calc(100% - 1rem);
+    }
+
+    .tab-btn {
+        flex: 1 1 45%;
+        font-size: 0.86rem;
+    }
+
+    .memory-card img {
+        height: 190px;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    * {
+        animation: none !important;
+        transition: none !important;
+        scroll-behavior: auto !important;
+    }
+
+    .reveal {
+        opacity: 1;
+        transform: none;
+    }
 }
