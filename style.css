@@ -1,0 +1,44 @@
+body {
+    margin: 0;
+    font-family: 'Georgia', serif;
+    background: linear-gradient(135deg, #fbc2eb, #a6c1ee);
+    height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    overflow: hidden;
+}
+
+.overlay {
+    text-align: center;
+    color: white;
+    backdrop-filter: blur(15px);
+    padding: 40px;
+    border-radius: 25px;
+    background: rgba(255,255,255,0.15);
+}
+
+#timer {
+    font-size: 22px;
+    margin: 20px 0;
+}
+
+button {
+    margin: 6px;
+    padding: 8px 14px;
+    border-radius: 20px;
+    border: none;
+    cursor: pointer;
+    background: rgba(255,255,255,0.3);
+    color: white;
+}
+
+.memory-text {
+    margin-top: 20px;
+    font-style: italic;
+}
+
+.secret {
+    margin-top: 20px;
+    font-weight: bold;
+}
