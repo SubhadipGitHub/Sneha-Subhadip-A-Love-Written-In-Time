@@ -212,6 +212,10 @@ body.modal-open {
 }
 
 .tab-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.42rem;
     border: 1px solid rgba(255, 255, 255, 0.22);
     border-radius: 999px;
     background: rgba(255, 255, 255, 0.08);
@@ -220,6 +224,28 @@ body.modal-open {
     font-size: 0.95rem;
     cursor: pointer;
     transition: transform 0.25s ease, background 0.3s ease, border-color 0.3s ease;
+}
+
+.tab-icon {
+    width: 14px;
+    height: 14px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.tab-icon svg {
+    width: 100%;
+    height: 100%;
+    fill: currentColor;
+}
+
+.help-text {
+    margin: 0.45rem auto 0;
+    color: #ffdce8;
+    font-size: 0.82rem;
+    line-height: 1.5;
+    max-width: 740px;
 }
 
 .tab-btn:hover,
@@ -490,7 +516,7 @@ p {
     margin-top: 0.35rem;
     display: flex;
     gap: 0.65rem;
-    align-items: center;
+    align-items: flex-start;
     justify-content: space-between;
     flex-wrap: wrap;
 }
@@ -499,6 +525,36 @@ p {
     margin: 0;
     font-family: "Cinzel", serif;
     font-size: clamp(1.4rem, 4vw, 2rem);
+}
+
+.itinerary-page-actions {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.45rem;
+    flex-wrap: wrap;
+}
+
+.guest-link {
+    text-decoration: none;
+}
+
+.guest-link:hover,
+.guest-link:focus-visible {
+    background: rgba(255, 214, 225, 0.38);
+    outline: none;
+}
+
+.inline-map-link {
+    color: #ffdbe6;
+    font-size: 0.86rem;
+    text-decoration: underline;
+    text-underline-offset: 2px;
+}
+
+.inline-map-link:hover,
+.inline-map-link:focus-visible {
+    color: #fff4f8;
+    outline: none;
 }
 
 .itinerary-cover-wrap {
@@ -779,6 +835,10 @@ input[type="password"]::placeholder {
 }
 
 .primary-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.42rem;
     border: none;
     border-radius: 0.7rem;
     padding: 0.72rem 1rem;
@@ -786,6 +846,36 @@ input[type="password"]::placeholder {
     color: #fff;
     cursor: pointer;
     font-weight: 700;
+    transition: transform 0.22s ease, filter 0.22s ease;
+}
+
+.primary-btn:hover,
+.primary-btn:focus-visible {
+    transform: translateY(-1px);
+    filter: brightness(1.04);
+    outline: none;
+}
+
+.btn-icon {
+    width: 14px;
+    height: 14px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.btn-icon svg {
+    width: 100%;
+    height: 100%;
+    fill: currentColor;
+}
+
+.rsvp-btn {
+    background: linear-gradient(130deg, #ff5f86, #ff7fa7);
+}
+
+.upload-btn {
+    background: linear-gradient(130deg, #4f84ff, #63c6ff);
 }
 
 .secret-message {
@@ -869,8 +959,27 @@ input[type="password"]::placeholder {
 }
 
 .itinerary-meta p {
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
     margin: 0.32rem 0;
     color: #ffebef;
+}
+
+.meta-icon {
+    width: 20px;
+    height: 20px;
+    border-radius: 999px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.66rem;
+    font-weight: 800;
+    letter-spacing: 0.02em;
+    background: rgba(255, 214, 225, 0.24);
+    border: 1px solid rgba(255, 255, 255, 0.28);
+    color: #fff5f9;
+    flex: 0 0 auto;
 }
 
 .itinerary-links {
