@@ -11,6 +11,8 @@
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
+    <div class="dreamy-orbs" aria-hidden="true"></div>
+    <div class="dreamy-mist" aria-hidden="true"></div>
     <div class="cinema-bg" aria-hidden="true"></div>
     <div class="film-grain" aria-hidden="true"></div>
 
@@ -128,7 +130,7 @@
             <div class="glass-card itinerary-shell reveal">
                 <div class="section-head centered">
                     <h2>Wedding Itinerary</h2>
-                    <p>Tap any event to view date, time, venue, and special notes.</p>
+                    <p>Tap any event card to open its full details page below.</p>
                 </div>
                 <div class="itinerary-grid">
                     <button
@@ -142,6 +144,9 @@
                         data-details="Music, dance, and family performances to begin the celebration."
                         data-upload="https://forms.gle/CRVTtRNku7sTBYiG6"
                         data-map-query="Regenta Orkos Hotel, Kolkata"
+                        data-guests="120 Guests"
+                        data-cover="https://i.pinimg.com/736x/e1/74/6f/e1746f99757ba8df07023d9f7a860347.jpg"
+                        data-gallery="images/new_year.png|Sangeet stage setup;images/valentine.jpg|Dance floor lights;images/engaged.png|Family performance moment"
                         data-program="games|7:10 PM|Couple Quiz;performances|7:30 PM|Friends Medley;games|7:45 PM|Family Dance Battle;performances|8:00 PM|Family Performances;food|8:30 PM|Live Chaat Counters;food|9:00 PM|Dinner Buffet"
                     >
                         <span class="itinerary-day">Dec 10</span>
@@ -160,6 +165,9 @@
                         data-details="A bright morning with marigolds, turmeric rituals, and laughter."
                         data-upload="https://forms.gle/CRVTtRNku7sTBYiG6"
                         data-map-query="Regenta Orkos Hotel, Kolkata"
+                        data-guests="120 Guests"
+                        data-cover="https://i.ytimg.com/vi/-yt7JE7I5M0/hq720.jpg?sqp=-oaymwEhCK4FEIIDSFryq4qpAxMIARUAAAAAGAElAADIQj0AgKJD&rs=AOn4CLB3J2SsGvy73wgNX0MZNuPesoPppQ"
+                        data-gallery="images/valentine.jpg|Haldi floral corner;images/Kunafa.png|Haldi sweets spread;images/fance.png|Fun haldi games"
                         data-program="performances|10:45 AM|Dhol Entry;games|11:15 AM|Floral Ring Toss;games|11:45 AM|Team Trivia;performances|12:00 PM|Cousins Performance;food|12:30 PM|Traditional Lunch Service"
                     >
                         <span class="itinerary-day">Dec 11</span>
@@ -178,6 +186,9 @@
                         data-details="The sacred wedding ceremony where we begin our forever."
                         data-upload="https://forms.gle/CRVTtRNku7sTBYiG6"
                         data-map-query="Regenta Orkos Hotel, Kolkata"
+                        data-guests="200 Guests"
+                        data-cover="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQ0sXIfdAQbbQzivWXXhQl0W2WI0eAa5Lahdw&s"
+                        data-gallery="images/engaged.png|Wedding mandap decor;images/agara.jpeg|Evening entry moment;images/ooty.jpg|Ritual ceremony highlights"
                         data-program="games|8:50 PM|Welcome Photo Challenge;performances|9:00 PM|Shehnai Ensemble;food|9:15 PM|Dinner Service Begins;performances|10:30 PM|Couple Entry"
                     >
                         <span class="itinerary-day">Dec 11</span>
@@ -196,6 +207,9 @@
                         data-details="A celebratory evening dinner with family, friends, and blessings."
                         data-upload="https://forms.gle/CRVTtRNku7sTBYiG6"
                         data-map-query="Princeton Club, Kolkata"
+                        data-guests="300 Guests"
+                        data-cover="https://songcart.in/cdn/shop/files/Ghibli.jpg?v=1743539173"
+                        data-gallery="images/ooty.jpg|Reception entrance lights;images/bike.png|Couple stage portrait;images/jd.png|Dinner and celebration"
                         data-program="games|7:45 PM|Guess The Couple Story;food|8:45 PM|Live Grill Stations;performances|9:00 PM|Friends Dance Set;games|9:20 PM|Lucky Draw;performances|9:35 PM|Live Band;food|10:15 PM|Main Course Buffet"
                     >
                         <span class="itinerary-day">Dec 13</span>
@@ -203,6 +217,38 @@
                         <p>Grand celebration with everyone</p>
                     </button>
                 </div>
+                <article id="itineraryPage" class="itinerary-page reveal" aria-live="polite">
+                    <p id="itineraryTag" class="itinerary-tag">Wedding Event</p>
+                    <div class="itinerary-page-head">
+                        <h3 id="itineraryTitle">Select an event</h3>
+                        <span id="itineraryGuests" class="guest-badge">Guests: TBA</span>
+                    </div>
+                    <div class="itinerary-cover-wrap">
+                        <img id="itineraryCover" src="images/engaged.png" alt="Wedding event cover image">
+                    </div>
+                    <div class="itinerary-meta">
+                        <p><strong>Date:</strong> <span id="itineraryDate"></span></p>
+                        <p><strong>Time:</strong> <span id="itineraryTime"></span></p>
+                        <p><strong>Guest Reporting Time:</strong> <span id="itineraryGuestTime"></span></p>
+                        <p><strong>Location:</strong> <span id="itineraryLocation"></span></p>
+                    </div>
+                    <div class="itinerary-links">
+                        <a id="itineraryUploadLink" class="primary-btn itinerary-link-btn" href="#" target="_blank" rel="noopener noreferrer">Upload Photos/Videos</a>
+                        <a id="itineraryMapLink" class="primary-btn itinerary-link-btn" href="#" target="_blank" rel="noopener noreferrer">Open In Google Maps</a>
+                    </div>
+                    <iframe
+                        id="itineraryMap"
+                        title="Event location map"
+                        loading="lazy"
+                        referrerpolicy="no-referrer-when-downgrade"
+                        src=""
+                    ></iframe>
+                    <div class="itinerary-program">
+                        <h4 class="timeline-heading">Event Timeline</h4>
+                        <ul id="itineraryTimeline" class="event-timeline"></ul>
+                    </div>
+                    <p id="itineraryDetails" class="itinerary-details"></p>
+                </article>
             </div>
         </section>
 
@@ -348,38 +394,8 @@
         </figure>
     </div>
 
-    <div id="itineraryModal" class="lightbox itinerary-modal" aria-hidden="true" role="dialog" aria-label="Wedding event details">
-        <button id="itineraryClose" class="lightbox-close" aria-label="Close event popup">&times;</button>
-        <article class="itinerary-modal-card">
-            <p id="itineraryTag" class="itinerary-tag">Event</p>
-            <h3 id="itineraryTitle">Wedding Event</h3>
-            <div class="itinerary-meta">
-                <p><strong>Date:</strong> <span id="itineraryDate"></span></p>
-                <p><strong>Time:</strong> <span id="itineraryTime"></span></p>
-                <p><strong>Guest Reporting Time:</strong> <span id="itineraryGuestTime"></span></p>
-                <p><strong>Location:</strong> <span id="itineraryLocation"></span></p>
-            </div>
-            <div class="itinerary-links">
-                <a id="itineraryUploadLink" class="primary-btn itinerary-link-btn" href="#" target="_blank" rel="noopener noreferrer">Upload Photos/Videos</a>
-                <a id="itineraryMapLink" class="primary-btn itinerary-link-btn" href="#" target="_blank" rel="noopener noreferrer">Open In Google Maps</a>
-            </div>
-            <iframe
-                id="itineraryMap"
-                title="Event location map"
-                loading="lazy"
-                referrerpolicy="no-referrer-when-downgrade"
-                src=""
-            ></iframe>
-            <div class="itinerary-program">
-                <h4 class="timeline-heading">Event Timeline</h4>
-                <ul id="itineraryTimeline" class="event-timeline"></ul>
-            </div>
-            <p id="itineraryDetails" class="itinerary-details"></p>
-        </article>
-    </div>
-
-    <audio id="bgMusic" loop preload="auto">
-        <source src="audio/romantic.mp4" type="audio/mpeg">
+    <audio id="bgMusic" loop preload="auto" data-tracks="audio/romantic.mp4">
+        <source src="audio/romantic.mp4" type="audio/mp4">
     </audio>
 
     <div class="music-control" aria-live="polite">

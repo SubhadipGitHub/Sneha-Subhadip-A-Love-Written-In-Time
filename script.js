@@ -23,10 +23,11 @@ const lightboxImage = document.getElementById("lightboxImage");
 const lightboxVideo = document.getElementById("lightboxVideo");
 const lightboxCaption = document.getElementById("lightboxCaption");
 const lightboxClose = document.getElementById("lightboxClose");
-const itineraryModal = document.getElementById("itineraryModal");
-const itineraryClose = document.getElementById("itineraryClose");
+const itineraryPage = document.getElementById("itineraryPage");
 const itineraryTag = document.getElementById("itineraryTag");
 const itineraryTitle = document.getElementById("itineraryTitle");
+const itineraryGuests = document.getElementById("itineraryGuests");
+const itineraryCover = document.getElementById("itineraryCover");
 const itineraryDate = document.getElementById("itineraryDate");
 const itineraryTime = document.getElementById("itineraryTime");
 const itineraryGuestTime = document.getElementById("itineraryGuestTime");
@@ -39,6 +40,7 @@ const itineraryDetails = document.getElementById("itineraryDetails");
 const bgMusic = document.getElementById("bgMusic");
 const musicToggleBtn = document.getElementById("musicToggleBtn");
 const musicStatus = document.getElementById("musicStatus");
+const defaultMusicTracks = ["audio/romantic.mp4"];
 
 function syncModalBodyLock() {
     const hasOpenModal = Boolean(document.querySelector(".lightbox.open"));
@@ -278,6 +280,21 @@ function parseProgramItems(item) {
     ];
 }
 
+function parseEventGallery(item) {
+    const galleryRaw = item.dataset.gallery || "";
+    if (!galleryRaw) return [];
+
+    return galleryRaw
+        .split(";")
+        .map((entry) => entry.trim())
+        .filter(Boolean)
+        .map((entry) => {
+            const [src = "", alt = "Wedding event memory"] = entry.split("|").map((part) => part.trim());
+            return { src, alt };
+        })
+        .filter((entry) => Boolean(entry.src));
+}
+
 function renderEventTimeline(items) {
     if (!itineraryTimeline) return;
     itineraryTimeline.innerHTML = "";
@@ -326,15 +343,42 @@ function renderEventTimeline(items) {
     });
 }
 
-function openItineraryModal(item) {
+function enrichItineraryCards() {
+    itineraryItems.forEach((item) => {
+        const guestLabel = item.dataset.guests || "Guests: TBA";
+        const cover = item.dataset.cover || parseEventGallery(item)[0]?.src || "";
+
+        const badge = document.createElement("span");
+        badge.className = "guest-badge";
+        badge.textContent = guestLabel;
+
+        item.appendChild(badge);
+        if (cover) {
+            const preview = document.createElement("div");
+            preview.className = "itinerary-mini-cover";
+
+            const thumb = document.createElement("img");
+            thumb.src = cover;
+            thumb.alt = `${item.dataset.event || "Wedding event"} cover preview`;
+            preview.appendChild(thumb);
+            item.appendChild(preview);
+        }
+    });
+}
+
+function openItineraryPage(item) {
     const mapQuery = item.dataset.mapQuery || item.dataset.location || "";
     const mapEmbed = `https://www.google.com/maps?q=${encodeURIComponent(mapQuery)}&output=embed`;
     const mapOpen = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(mapQuery)}`;
     const uploadLink = item.dataset.upload || "#";
     const programItems = parseProgramItems(item);
+    const cover = item.dataset.cover || parseEventGallery(item)[0]?.src || "images/engaged.png";
 
     itineraryTag.textContent = "Wedding Event";
     itineraryTitle.textContent = item.dataset.event || "Event Details";
+    itineraryGuests.textContent = item.dataset.guests || "Guests: TBA";
+    itineraryCover.src = cover;
+    itineraryCover.alt = `${itineraryTitle.textContent} cover image`;
     itineraryDate.textContent = item.dataset.date || "To be announced";
     itineraryTime.textContent = item.dataset.time || "To be announced";
     itineraryGuestTime.textContent = item.dataset.guestTime || "Please arrive 45 mins early";
@@ -344,24 +388,23 @@ function openItineraryModal(item) {
     itineraryMap.src = mapEmbed;
     renderEventTimeline(programItems);
     itineraryDetails.textContent = item.dataset.details || "";
-
-    itineraryModal.classList.add("open");
-    itineraryModal.setAttribute("aria-hidden", "false");
-    syncModalBodyLock();
-}
-
-function closeItineraryModal() {
-    itineraryModal.classList.remove("open");
-    itineraryModal.setAttribute("aria-hidden", "true");
-    itineraryMap.src = "";
-    syncModalBodyLock();
 }
 
 function setupWeddingItinerary() {
-    if (!itineraryItems.length || !itineraryModal || !itineraryClose) return;
+    if (!itineraryItems.length || !itineraryPage) return;
+
+    enrichItineraryCards();
 
     itineraryItems.forEach((item) => {
-        const openDetails = () => openItineraryModal(item);
+        const openDetails = () => {
+            itineraryItems.forEach((card) => card.classList.remove("active"));
+            item.classList.add("active");
+            openItineraryPage(item);
+
+            if (window.innerWidth <= 860) {
+                itineraryPage.scrollIntoView({ behavior: "smooth", block: "start" });
+            }
+        };
 
         item.addEventListener("click", openDetails);
         item.addEventListener("keydown", (event) => {
@@ -372,19 +415,11 @@ function setupWeddingItinerary() {
         });
     });
 
-    itineraryClose.addEventListener("click", closeItineraryModal);
-
-    itineraryModal.addEventListener("click", (event) => {
-        if (event.target === itineraryModal) {
-            closeItineraryModal();
-        }
-    });
-
-    document.addEventListener("keydown", (event) => {
-        if (event.key === "Escape" && itineraryModal.classList.contains("open")) {
-            closeItineraryModal();
-        }
-    });
+    const defaultItem = itineraryItems[0];
+    if (defaultItem) {
+        defaultItem.classList.add("active");
+        openItineraryPage(defaultItem);
+    }
 }
 
 function updateMusicUi(isPlaying) {
@@ -393,6 +428,52 @@ function updateMusicUi(isPlaying) {
     musicStatus.textContent = isPlaying
         ? "Background music is playing"
         : "Tap to start background music";
+}
+
+function resolveMusicPlaylist() {
+    const rawTracks = bgMusic.dataset.tracks || "";
+    const tracks = rawTracks
+        .split(",")
+        .map((track) => track.trim())
+        .filter(Boolean);
+
+    return tracks.length ? tracks : defaultMusicTracks;
+}
+
+function getAudioMimeType(track) {
+    const normalized = (track || "").toLowerCase();
+    if (normalized.endsWith(".mp3")) return "audio/mpeg";
+    if (normalized.endsWith(".ogg")) return "audio/ogg";
+    if (normalized.endsWith(".wav")) return "audio/wav";
+    return "audio/mp4";
+}
+
+function setMusicSource(track) {
+    if (!track) return;
+
+    const source = bgMusic.querySelector("source");
+    if (source) {
+        source.src = track;
+        source.type = getAudioMimeType(track);
+    }
+
+    bgMusic.src = track;
+    bgMusic.load();
+}
+
+function setupRandomMusicStart() {
+    bgMusic.addEventListener(
+        "loadedmetadata",
+        () => {
+            if (!Number.isFinite(bgMusic.duration) || bgMusic.duration < 12) return;
+
+            // Keep intro/outro variety while avoiding abrupt ending starts.
+            const safeStart = bgMusic.duration * 0.08;
+            const safeEnd = bgMusic.duration * 0.72;
+            bgMusic.currentTime = safeStart + Math.random() * (safeEnd - safeStart);
+        },
+        { once: true }
+    );
 }
 
 async function toggleMusic() {
@@ -412,6 +493,10 @@ async function toggleMusic() {
 
 function setupBackgroundMusic() {
     bgMusic.volume = 0.35;
+    const playlist = resolveMusicPlaylist();
+    const randomTrack = playlist[Math.floor(Math.random() * playlist.length)];
+    setMusicSource(randomTrack);
+    setupRandomMusicStart();
     musicToggleBtn.addEventListener("click", toggleMusic);
     updateMusicUi(false);
 }
