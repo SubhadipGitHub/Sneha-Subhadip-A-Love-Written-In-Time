@@ -15,6 +15,10 @@ const tabPanels = Array.from(document.querySelectorAll(".tab-panel"));
 const unlockBtn = document.getElementById("unlockBtn");
 const secretInput = document.getElementById("secretInput");
 const secretMessage = document.getElementById("secretMessage");
+const letterCard = document.querySelector(".letter-card");
+const letterStatusBadge = document.getElementById("letterStatusBadge");
+const letterLockState = document.getElementById("letterLockState");
+const letterFunError = document.getElementById("letterFunError");
 
 const memoryCards = Array.from(document.querySelectorAll(".memory-card"));
 const itineraryItems = Array.from(document.querySelectorAll(".itinerary-item"));
@@ -38,10 +42,19 @@ const itineraryMapInlineLink = document.getElementById("itineraryMapInlineLink")
 const itineraryMap = document.getElementById("itineraryMap");
 const itineraryTimeline = document.getElementById("itineraryTimeline");
 const itineraryDetails = document.getElementById("itineraryDetails");
+const activityModal = document.getElementById("activityModal");
+const activityModalClose = document.getElementById("activityModalClose");
+const activityModalTitle = document.getElementById("activityModalTitle");
+const activityModalCategoryIcon = document.getElementById("activityModalCategoryIcon");
+const activityModalImage = document.getElementById("activityModalImage");
+const activityModalTime = document.getElementById("activityModalTime");
+const activityModalStatus = document.getElementById("activityModalStatus");
+const activityModalDetail = document.getElementById("activityModalDetail");
 const bgMusic = document.getElementById("bgMusic");
 const musicToggleBtn = document.getElementById("musicToggleBtn");
 const musicStatus = document.getElementById("musicStatus");
 const defaultMusicTracks = ["audio/romantic.mp4"];
+let activeItineraryItem = null;
 
 function syncModalBodyLock() {
     const hasOpenModal = Boolean(document.querySelector(".lightbox.open"));
@@ -102,13 +115,43 @@ function unlockLoveLetter() {
     const passcode = secretInput.value.trim().toLowerCase();
 
     if (passcode === "forever") {
-        secretMessage.textContent = "Sneha, from Kunafa to forever, I choose you today, tomorrow, and always. ❤️";
-        secretMessage.style.color = "#fff0d2";
+        secretMessage.textContent = "Sneha, from Kunafa to forever, I choose you today, tomorrow, and always. <3";
+        secretMessage.classList.remove("error");
+        secretMessage.classList.add("success");
+        if (letterCard) {
+            letterCard.classList.add("is-unlocked");
+            letterCard.classList.remove("is-error");
+        }
+        if (letterStatusBadge) {
+            letterStatusBadge.textContent = "Unlocked";
+        }
+        if (letterFunError) {
+            letterFunError.textContent = "Unlocked. Your secret memories are now visible.";
+        }
+        if (letterLockState) {
+            letterLockState.setAttribute("aria-hidden", "true");
+        }
         return;
     }
 
-    secretMessage.textContent = "That secret word is not right yet.";
-    secretMessage.style.color = "#ffd5df";
+    secretMessage.textContent = "Nope. That word is shy today. Try again with your forever word.";
+    secretMessage.classList.remove("success");
+    secretMessage.classList.add("error");
+    if (letterCard) {
+        letterCard.classList.remove("is-unlocked");
+        letterCard.classList.remove("is-error");
+        void letterCard.offsetWidth;
+        letterCard.classList.add("is-error");
+    }
+    if (letterStatusBadge) {
+        letterStatusBadge.textContent = "Try Again";
+    }
+    if (letterFunError) {
+        letterFunError.textContent = "Oops. Cute lock says: almost there. Try the forever-love word.";
+    }
+    if (letterLockState) {
+        letterLockState.setAttribute("aria-hidden", "false");
+    }
 }
 
 function setupRevealAnimations() {
@@ -235,6 +278,9 @@ function setupMemoryLightbox() {
         if (event.key === "Escape" && lightbox.classList.contains("open")) {
             closeLightbox();
         }
+        if (event.key === "Escape" && activityModal?.classList.contains("open")) {
+            closeActivityModal();
+        }
     });
 }
 
@@ -265,11 +311,14 @@ function parseProgramItems(item) {
             .map((entry) => entry.trim())
             .filter(Boolean)
             .map((entry) => {
-                const [category = "", time = "", title = ""] = entry.split("|").map((part) => part.trim());
+                const [category = "", time = "", title = "", ...rest] = entry
+                    .split("|")
+                    .map((part) => part.trim());
                 return {
                     category: category.toLowerCase(),
                     time,
-                    title: title || "Program item"
+                    title: title || "Program item",
+                    detail: rest.join(" | ")
                 };
             });
     }
@@ -279,6 +328,121 @@ function parseProgramItems(item) {
         ...parseLegacyProgramItems("food", item.dataset.food || ""),
         ...parseLegacyProgramItems("performances", item.dataset.performances || "")
     ];
+}
+
+function parseScheduleDateTime(dateLabel, timeLabel) {
+    if (!dateLabel || !timeLabel || timeLabel.toLowerCase() === "tba") return null;
+    const parsed = new Date(`${dateLabel} ${timeLabel}`);
+    return Number.isNaN(parsed.getTime()) ? null : parsed;
+}
+
+function extractComparableTime(timeLabel) {
+    if (!timeLabel) return "11:59 PM";
+    const match = timeLabel.match(/(\d{1,2}:\d{2}\s*[AP]M)/i);
+    return match ? match[1].toUpperCase() : timeLabel;
+}
+
+function getTimelineStatus(dateLabel, timeLabel, category) {
+    const scheduledAt = parseScheduleDateTime(dateLabel, timeLabel);
+    if (!scheduledAt) {
+        return { label: "Open", className: "open", isDone: false };
+    }
+
+    const isDone = Date.now() >= scheduledAt.getTime();
+    const doneLabel = category === "food" ? "Closed" : "Done";
+    return {
+        label: isDone ? doneLabel : "Open",
+        className: isDone ? "done" : "open",
+        isDone
+    };
+}
+
+function buildActivityDetail(entry, meta) {
+    const eventName = meta?.event || "the event";
+    const location = meta?.location || "the venue";
+    const category = entry.category || "program";
+    const lowerTitle = (entry.title || "").toLowerCase();
+
+    const categoryNotes = {
+        games: "Expect audience participation, quick instructions from hosts, and group-friendly rounds.",
+        food: "Counters will open for this slot with fresh service and short queue windows.",
+        performances: "Stage lights, audio checks, and sequence coordination will run during this segment."
+    };
+
+    const titleHints = [
+        { key: "quiz", note: "Teams will be formed quickly and points will be counted live by the emcee." },
+        { key: "medley", note: "Back-to-back songs are queued, so performers should stay ready near the stage wings." },
+        { key: "battle", note: "This round is high-energy with quick transitions between family groups." },
+        { key: "entry", note: "Please be seated before this starts so the entry path remains clear." },
+        { key: "buffet", note: "Food stations will run in parallel; elders and children can be served first." },
+        { key: "draw", note: "Keep your invite token handy for the draw announcement and prize pickup." }
+    ];
+    const matchedHint = titleHints.find((hint) => lowerTitle.includes(hint.key))?.note;
+
+    return entry.detail
+        ? entry.detail
+        : `${entry.title} is scheduled during ${eventName} at ${location}. ${categoryNotes[category] || categoryNotes.performances} ${matchedHint || "Please arrive 10 minutes early for smooth transitions."}`;
+}
+
+function getActivityVisuals(category) {
+    const visualMap = {
+        games: {
+            icon: "G",
+            image: "images/bike.png",
+            alt: "Games activity image"
+        },
+        food: {
+            icon: "F",
+            image: "images/Kunafa.png",
+            alt: "Food activity image"
+        },
+        performances: {
+            icon: "P",
+            image: "images/fance.png",
+            alt: "Performance activity image"
+        }
+    };
+    return visualMap[category] || visualMap.performances;
+}
+
+function openActivityModal(entry, meta, status) {
+    if (!activityModal) return;
+    const visuals = getActivityVisuals(entry.category);
+
+    activityModalTitle.textContent = entry.title || "Program Item";
+    if (activityModalCategoryIcon) {
+        activityModalCategoryIcon.textContent = visuals.icon;
+        activityModalCategoryIcon.className = `activity-category-icon ${entry.category || "performances"}`;
+    }
+    if (activityModalImage) {
+        activityModalImage.src = visuals.image;
+        activityModalImage.alt = visuals.alt;
+    }
+    activityModalTime.textContent = `Time: ${entry.time || "TBA"} | Date: ${meta?.date || "TBA"}`;
+    activityModalStatus.textContent = `Status: ${status.label}`;
+    activityModalStatus.className = `activity-modal-status ${status.className}`;
+    activityModalDetail.textContent = buildActivityDetail(entry, meta);
+    activityModal.classList.add("open");
+    activityModal.setAttribute("aria-hidden", "false");
+    syncModalBodyLock();
+}
+
+function closeActivityModal() {
+    if (!activityModal) return;
+    activityModal.classList.remove("open");
+    activityModal.setAttribute("aria-hidden", "true");
+    syncModalBodyLock();
+}
+
+function setupActivityModal() {
+    if (!activityModal || !activityModalClose) return;
+
+    activityModalClose.addEventListener("click", closeActivityModal);
+    activityModal.addEventListener("click", (event) => {
+        if (event.target === activityModal) {
+            closeActivityModal();
+        }
+    });
 }
 
 function parseEventGallery(item) {
@@ -296,7 +460,7 @@ function parseEventGallery(item) {
         .filter((entry) => Boolean(entry.src));
 }
 
-function renderEventTimeline(items) {
+function renderEventTimeline(items, meta) {
     if (!itineraryTimeline) return;
     itineraryTimeline.innerHTML = "";
 
@@ -317,6 +481,8 @@ function renderEventTimeline(items) {
     items.forEach((entry) => {
         const row = document.createElement("li");
         row.className = "timeline-row";
+        row.setAttribute("role", "button");
+        row.setAttribute("tabindex", "0");
 
         const time = document.createElement("span");
         time.className = "timeline-time";
@@ -329,6 +495,7 @@ function renderEventTimeline(items) {
         const safeCategory = ["games", "food", "performances"].includes(entry.category)
             ? entry.category
             : "performances";
+        row.classList.add(`timeline-row-${safeCategory}`);
         category.className = `timeline-category ${safeCategory}`;
         category.textContent = safeCategory;
 
@@ -336,24 +503,44 @@ function renderEventTimeline(items) {
         title.className = "timeline-title";
         title.textContent = entry.title || "Program item";
 
+        const status = getTimelineStatus(meta?.date, entry.time, safeCategory);
+        const modalEntry = { ...entry, category: safeCategory };
+        const statusBadge = document.createElement("span");
+        statusBadge.className = `timeline-state ${status.className}`;
+        statusBadge.textContent = status.label;
+
+        if (status.isDone) {
+            row.classList.add("is-done");
+        }
+
         body.appendChild(category);
         body.appendChild(title);
+        body.appendChild(statusBadge);
         row.appendChild(time);
         row.appendChild(body);
+        row.addEventListener("click", () => openActivityModal(modalEntry, meta, status));
+        row.addEventListener("keydown", (event) => {
+            if (event.key === "Enter" || event.key === " ") {
+                event.preventDefault();
+                openActivityModal(modalEntry, meta, status);
+            }
+        });
         itineraryTimeline.appendChild(row);
     });
 }
 
+function buildGuestBadgeText(item) {
+    const total = item.dataset.total;
+    const attending = item.dataset.attending;
+    if (total || attending) {
+        return `Total: ${total || "TBA"} | Attending: ${attending || "TBA"}`;
+    }
+    return item.dataset.guests || "Guests: TBA";
+}
+
 function enrichItineraryCards() {
     itineraryItems.forEach((item) => {
-        const guestLabel = item.dataset.guests || "Guests: TBA";
         const cover = item.dataset.cover || parseEventGallery(item)[0]?.src || "";
-
-        const badge = document.createElement("span");
-        badge.className = "guest-badge";
-        badge.textContent = guestLabel;
-
-        item.appendChild(badge);
         if (cover) {
             const preview = document.createElement("div");
             preview.className = "itinerary-mini-cover";
@@ -368,6 +555,8 @@ function enrichItineraryCards() {
 }
 
 function openItineraryPage(item) {
+    closeActivityModal();
+    activeItineraryItem = item;
     const mapQuery = item.dataset.mapQuery || item.dataset.location || "";
     const mapEmbed = `https://www.google.com/maps?q=${encodeURIComponent(mapQuery)}&output=embed`;
     const mapOpen = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(mapQuery)}`;
@@ -379,7 +568,7 @@ function openItineraryPage(item) {
 
     itineraryTag.textContent = "Wedding Event";
     itineraryTitle.textContent = item.dataset.event || "Event Details";
-    itineraryGuestsLink.textContent = item.dataset.guests || "Guests: TBA";
+    itineraryGuestsLink.textContent = buildGuestBadgeText(item);
     itineraryGuestsLink.href = guestListLink;
     itineraryCover.src = cover;
     itineraryCover.alt = `${itineraryTitle.textContent} cover image`;
@@ -391,7 +580,11 @@ function openItineraryPage(item) {
     itineraryUploadLink.href = uploadLink;
     itineraryMapInlineLink.href = mapOpen;
     itineraryMap.src = mapEmbed;
-    renderEventTimeline(programItems);
+    renderEventTimeline(programItems, {
+        event: item.dataset.event || "Wedding Event",
+        date: item.dataset.date || "",
+        location: item.dataset.location || ""
+    });
     itineraryDetails.textContent = item.dataset.details || "";
 }
 
@@ -425,6 +618,15 @@ function setupWeddingItinerary() {
         defaultItem.classList.add("active");
         openItineraryPage(defaultItem);
     }
+
+    setInterval(() => {
+        if (!activeItineraryItem) return;
+        renderEventTimeline(parseProgramItems(activeItineraryItem), {
+            event: activeItineraryItem.dataset.event || "Wedding Event",
+            date: activeItineraryItem.dataset.date || "",
+            location: activeItineraryItem.dataset.location || ""
+        });
+    }, 60000);
 }
 
 function updateMusicUi(isPlaying) {
@@ -517,6 +719,7 @@ bindTabs();
 activateTab("home");
 setupRevealAnimations();
 setupMemoryLightbox();
+setupActivityModal();
 setupWeddingItinerary();
 setupBackgroundMusic();
 updateTimers();

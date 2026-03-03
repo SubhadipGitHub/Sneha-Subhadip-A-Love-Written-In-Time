@@ -17,8 +17,8 @@
     <div class="film-grain" aria-hidden="true"></div>
 
     <header class="hero reveal">
-        <p class="hero-kicker">A Love Written In Time</p>
-        <h1>Sneha <span>&</span> Subhadip</h1>
+        <p class="hero-kicker">A Love written in time</p>
+        <h1>SNEHA <span>&</span> SUBHADIP</h1>
         <p class="hero-subtitle">From March 1, 2025 to forever.</p>
     </header>
 
@@ -168,6 +168,8 @@
                         data-guest-list="https://docs.google.com/spreadsheets/d/1K9exampleSangeetGuestList/edit?usp=sharing"
                         data-map-query="Regenta Orkos Hotel, Kolkata"
                         data-guests="120 Guests"
+                        data-total="120"
+                        data-attending="86"
                         data-cover="https://i.pinimg.com/736x/e1/74/6f/e1746f99757ba8df07023d9f7a860347.jpg"
                         data-program="games|7:10 PM|Couple Quiz;performances|7:30 PM|Friends Medley;games|7:45 PM|Family Dance Battle;performances|8:00 PM|Family Performances;food|8:30 PM|Live Chaat Counters;food|9:00 PM|Dinner Buffet"
                     >
@@ -190,6 +192,8 @@
                         data-guest-list="https://docs.google.com/spreadsheets/d/1K9exampleHaldiGuestList/edit?usp=sharing"
                         data-map-query="Regenta Orkos Hotel, Kolkata"
                         data-guests="120 Guests"
+                        data-total="120"
+                        data-attending="92"
                         data-cover="https://i.ytimg.com/vi/-yt7JE7I5M0/hq720.jpg?sqp=-oaymwEhCK4FEIIDSFryq4qpAxMIARUAAAAAGAElAADIQj0AgKJD&rs=AOn4CLB3J2SsGvy73wgNX0MZNuPesoPppQ"
                         data-program="performances|10:45 AM|Dhol Entry;games|11:15 AM|Floral Ring Toss;games|11:45 AM|Team Trivia;performances|12:00 PM|Cousins Performance;food|12:30 PM|Traditional Lunch Service"
                     >
@@ -212,6 +216,8 @@
                         data-guest-list="https://docs.google.com/spreadsheets/d/1K9exampleWeddingGuestList/edit?usp=sharing"
                         data-map-query="Regenta Orkos Hotel, Kolkata"
                         data-guests="200 Guests"
+                        data-total="200"
+                        data-attending="164"
                         data-cover="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQ0sXIfdAQbbQzivWXXhQl0W2WI0eAa5Lahdw&s"
                         data-program="games|8:50 PM|Welcome Photo Challenge;performances|9:00 PM|Shehnai Ensemble;food|9:15 PM|Dinner Service Begins;performances|10:30 PM|Couple Entry"
                     >
@@ -234,6 +240,8 @@
                         data-guest-list="https://docs.google.com/spreadsheets/d/1K9exampleReceptionGuestList/edit?usp=sharing"
                         data-map-query="Princeton Club, Kolkata"
                         data-guests="300 Guests"
+                        data-total="300"
+                        data-attending="211"
                         data-cover="https://songcart.in/cdn/shop/files/Ghibli.jpg?v=1743539173"
                         data-gallery="images/ooty.jpg|Reception entrance lights;images/bike.png|Couple stage portrait;images/jd.png|Dinner and celebration"
                         data-program="games|7:45 PM|Guess The Couple Story;food|8:45 PM|Live Grill Stations;performances|9:00 PM|Friends Dance Set;games|9:20 PM|Lucky Draw;performances|9:35 PM|Live Band;food|10:15 PM|Main Course Buffet"
@@ -403,13 +411,52 @@
         </section>
 
         <section id="letter" class="tab-panel reveal" aria-labelledby="letter-tab">
-            <div class="glass-card centered letter-card">
-                <h2>Unlock Our Secret Letter</h2>
-                <p>Enter the secret word to reveal the message.</p>
-                <p class="help-text">Hint: the word reflects forever-love.</p>
+            <div class="glass-card letter-card">
+                <span class="letter-float letter-float-1" aria-hidden="true">&lt;3</span>
+                <span class="letter-float letter-float-2" aria-hidden="true">*</span>
+                <span class="letter-float letter-float-3" aria-hidden="true">o</span>
+
+                <div class="letter-head">
+                    <p class="letter-kicker">Private Chapter</p>
+                    <h2>Unlock Our Secret Letter</h2>
+                    <p class="letter-intro">A little vault of moments, promises, and forever-plans waiting for the right word.</p>
+                    <p id="letterStatusBadge" class="letter-status">Locked</p>
+                </div>
+
+                <div id="letterLockState" class="letter-lock-state">
+                    <div class="lock-mascot" aria-hidden="true">
+                        <span class="lock-shackle"></span>
+                        <span class="lock-body"></span>
+                        <span class="lock-spark lock-spark-1">*</span>
+                        <span class="lock-spark lock-spark-2">*</span>
+                    </div>
+                    <p id="letterFunError" class="letter-fun-error">Enter the magic word to reveal the secret photo gallery.</p>
+                </div>
+
+                <div class="letter-gallery">
+                    <article class="letter-memory-card reveal">
+                        <img src="images/Kunafa.png" alt="Kunafa memory">
+                        <p><span aria-hidden="true">[Promise 01]</span> Since our Kunafa evening, I promise to keep choosing us with the same sweetness, even on ordinary days.</p>
+                    </article>
+                    <article class="letter-memory-card reveal">
+                        <img src="images/wayanad.jpg" alt="Wayanad trip memory">
+                        <p><span aria-hidden="true">[Promise 02]</span> From our Wayanad roads and rain, I promise to stand beside you through every turn, calm or storm.</p>
+                    </article>
+                    <article class="letter-memory-card reveal">
+                        <img src="images/new_year.png" alt="New Year celebration memory">
+                        <p><span aria-hidden="true">[Promise 03]</span> Since that New Year night, I promise to build each year with you, with more patience, laughter, and love.</p>
+                    </article>
+                </div>
+
+                <p class="help-text letter-help">Hint: the word reflects forever-love.</p>
                 <div class="unlock-row">
                     <input id="secretInput" type="password" placeholder="Type secret word" aria-label="Secret word">
-                    <button id="unlockBtn" class="primary-btn">Unlock</button>
+                    <button id="unlockBtn" class="primary-btn">
+                        <span class="btn-icon" aria-hidden="true">
+                            <svg viewBox="0 0 24 24" focusable="false"><path d="M12 2a5 5 0 0 1 5 5v3h1a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2v-8a2 2 0 0 1 2-2h1V7a5 5 0 0 1 5-5zm3 8V7a3 3 0 0 0-6 0v3h6zm-3 4a2 2 0 0 0-1 3.73V19h2v-1.27A2 2 0 0 0 12 14z"/></svg>
+                        </span>
+                        Unlock Letter
+                    </button>
                 </div>
                 <p id="secretMessage" class="secret-message"></p>
             </div>
@@ -431,6 +478,23 @@
             ></iframe>
             <figcaption id="lightboxCaption"></figcaption>
         </figure>
+    </div>
+
+    <div id="activityModal" class="lightbox activity-lightbox" aria-hidden="true" role="dialog" aria-label="Itinerary activity details">
+        <article class="activity-modal-card">
+            <button id="activityModalClose" class="lightbox-close activity-close" aria-label="Close activity details">&times;</button>
+            <p class="itinerary-tag">Activity Details</p>
+            <div class="activity-modal-head">
+                <span id="activityModalCategoryIcon" class="activity-category-icon" aria-hidden="true">A</span>
+                <h3 id="activityModalTitle">Program Item</h3>
+            </div>
+            <div class="activity-modal-cover">
+                <img id="activityModalImage" src="images/engaged.png" alt="Activity cover image">
+            </div>
+            <p id="activityModalTime" class="activity-modal-time"></p>
+            <p id="activityModalStatus" class="activity-modal-status"></p>
+            <p id="activityModalDetail" class="activity-modal-detail"></p>
+        </article>
     </div>
 
     <audio id="bgMusic" loop preload="auto" data-tracks="audio/romantic.mp4">
