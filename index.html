@@ -331,23 +331,14 @@
                     <h2>Dreamy Wishes Garden</h2>
                     <p>Send your blessings and tap any bubble to make it pop.</p>
                 </div>
-
-                <form id="wishesForm" class="wishes-form">
-                    <label class="wishes-field">
-                        <span>Your Name</span>
-                        <input id="wishName" type="text" maxlength="45" placeholder="Type your name" required>
-                    </label>
-                    <label class="wishes-field">
-                        <span>Well Wish</span>
-                        <input id="wishText" type="text" maxlength="90" placeholder="Blessings for the couple" required>
-                    </label>
-                    <button type="submit" class="primary-btn">
+                <div class="wishes-panel-actions">
+                    <button id="openWishFormModalBtn" type="button" class="primary-btn">
                         <span class="btn-icon" aria-hidden="true">
                             <svg viewBox="0 0 24 24" focusable="false"><path d="M2 21 23 12 2 3l4 7 9 2-9 2-4 7z"/></svg>
                         </span>
-                        Send Wish
+                        Send A Wish
                     </button>
-                </form>
+                </div>
                 <p id="wishFormStatus" class="wish-form-status">Be the first to leave a blessing.</p>
 
                 <div id="wishBubbleField" class="wish-bubble-field" aria-label="Floating wishes bubbles"></div>
@@ -355,9 +346,11 @@
         </section>
 
         <section id="memories" class="tab-panel reveal" aria-labelledby="memories-tab">
-            <div class="section-head">
-                <h2>Memory Timeline</h2>
-                <p>A dated journey of moments that built our forever.</p>
+            <div class="glass-card memory-intro-section">
+                <div class="section-head centered">
+                    <h2>Memory Timeline</h2>
+                    <p>A dated journey of moments that built our forever.</p>
+                </div>
             </div>
 
             <div class="memory-grid memory-timeline">
@@ -385,6 +378,9 @@
                         <p>Our first trip, where silence, mist, and love all felt endless.</p>
                     </div>
                 </article>
+            </div>
+
+            <div class="memory-grid memory-timeline">
                 <article class="memory-card reveal">
                     <img src="images/fance.png" alt="Dance and music memory">
                     <div class="memory-content">
@@ -409,6 +405,9 @@
                         <p>Golden sunset, quiet water, and a memory that still glows.</p>
                     </div>
                 </article>
+            </div>
+
+            <div class="memory-grid memory-timeline">
                 <article class="memory-card reveal">
                     <img src="images/new_year.png" alt="New Year celebration memory">
                     <div class="memory-content">
@@ -433,6 +432,9 @@
                         <p>One last getaway before wedding plans turned into our next chapter.</p>
                     </div>
                 </article>
+            </div>
+
+            <div class="memory-grid memory-timeline">
                 <article class="memory-card reveal">
                     <img src="images/valentine.jpg" alt="Romantic candlelight date memory">
                     <div class="memory-content">
@@ -550,6 +552,30 @@
             <p id="activityModalTime" class="activity-modal-time"></p>
             <p id="activityModalStatus" class="activity-modal-status"></p>
             <p id="activityModalDetail" class="activity-modal-detail"></p>
+        </article>
+    </div>
+
+    <div id="wishFormModal" class="lightbox wish-form-lightbox" aria-hidden="true" role="dialog" aria-label="Send a wedding wish">
+        <article class="wish-form-modal-card">
+            <button id="wishFormModalClose" class="lightbox-close activity-close" aria-label="Close wish form">&times;</button>
+            <p class="itinerary-tag">Send Blessings</p>
+            <h3>Write Your Wish</h3>
+            <form id="wishesForm" class="wishes-form">
+                <label class="wishes-field">
+                    <span>Your Name</span>
+                    <input id="wishName" type="text" maxlength="45" placeholder="Type your name" required>
+                </label>
+                <label class="wishes-field">
+                    <span>Well Wish</span>
+                    <input id="wishText" type="text" maxlength="90" placeholder="Blessings for the couple" required>
+                </label>
+                <button type="submit" class="primary-btn">
+                    <span class="btn-icon" aria-hidden="true">
+                        <svg viewBox="0 0 24 24" focusable="false"><path d="M2 21 23 12 2 3l4 7 9 2-9 2-4 7z"/></svg>
+                    </span>
+                    Send Wish
+                </button>
+            </form>
         </article>
     </div>
 

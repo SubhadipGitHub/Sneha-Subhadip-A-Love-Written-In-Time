@@ -49,6 +49,9 @@ const wishName = document.getElementById("wishName");
 const wishText = document.getElementById("wishText");
 const wishFormStatus = document.getElementById("wishFormStatus");
 const wishBubbleField = document.getElementById("wishBubbleField");
+const openWishFormModalBtn = document.getElementById("openWishFormModalBtn");
+const wishFormModal = document.getElementById("wishFormModal");
+const wishFormModalClose = document.getElementById("wishFormModalClose");
 const activityModal = document.getElementById("activityModal");
 const activityModalClose = document.getElementById("activityModalClose");
 const activityModalTitle = document.getElementById("activityModalTitle");
@@ -66,6 +69,9 @@ let activeItineraryItem = null;
 let wishesData = [];
 let wishesRefreshTimer = null;
 let popAudioCtx = null;
+let panelSectionRaf = null;
+let wishCycleDeck = [];
+let wishCycleCursor = 0;
 
 function syncModalBodyLock() {
     const hasOpenModal = Boolean(document.querySelector(".lightbox.open"));
@@ -112,13 +118,87 @@ function activateTab(tabId) {
     });
 
     tabPanels.forEach((panel) => {
-        panel.classList.toggle("active", panel.id === tabId);
+        const isActive = panel.id === tabId;
+        panel.classList.toggle("active", isActive);
+        if (isActive) {
+            updatePanelViewportHeight(panel);
+            updatePanelSectionState(panel);
+        }
     });
 }
 
 function bindTabs() {
     tabButtons.forEach((button) => {
         button.addEventListener("click", () => activateTab(button.dataset.tab));
+    });
+}
+
+function getTabSections(panel) {
+    if (!panel) return [];
+    return Array.from(panel.children).filter((child) => child.nodeType === 1);
+}
+
+function updatePanelViewportHeight(panel) {
+    if (!panel || !panel.classList.contains("multi-sections")) return;
+    const panelTop = panel.getBoundingClientRect().top;
+    const safeHeight = Math.max(window.innerHeight - panelTop - 14, 320);
+    panel.style.setProperty("--panel-view-height", `${Math.round(safeHeight)}px`);
+}
+
+function updatePanelSectionState(panel) {
+    if (!panel || !panel.classList.contains("multi-sections")) return;
+    const sections = getTabSections(panel).filter((section) => section.classList.contains("tab-scroll-section"));
+    const visibleSections = sections.filter((section) => window.getComputedStyle(section).display !== "none");
+    if (!visibleSections.length) return;
+
+    const panelCenter = panel.scrollTop + panel.clientHeight / 2;
+    let closest = visibleSections[0];
+    let closestDistance = Number.POSITIVE_INFINITY;
+
+    visibleSections.forEach((section) => {
+        const sectionCenter = section.offsetTop + section.offsetHeight / 2;
+        const distance = Math.abs(sectionCenter - panelCenter);
+        if (distance < closestDistance) {
+            closestDistance = distance;
+            closest = section;
+        }
+    });
+
+    visibleSections.forEach((section) => {
+        section.classList.toggle("section-in-view", section === closest);
+    });
+}
+
+function queuePanelSectionState(panel) {
+    if (panelSectionRaf) {
+        cancelAnimationFrame(panelSectionRaf);
+    }
+    panelSectionRaf = requestAnimationFrame(() => {
+        panelSectionRaf = null;
+        updatePanelSectionState(panel);
+    });
+}
+
+function setupTabSectionScrollExperience() {
+    tabPanels.forEach((panel) => {
+        const sections = getTabSections(panel);
+        if (sections.length < 2) return;
+
+        panel.classList.add("multi-sections");
+        sections.forEach((section) => {
+            section.classList.add("tab-scroll-section");
+        });
+
+        panel.addEventListener("scroll", () => queuePanelSectionState(panel), { passive: true });
+        updatePanelViewportHeight(panel);
+        updatePanelSectionState(panel);
+    });
+
+    window.addEventListener("resize", () => {
+        tabPanels.forEach((panel) => {
+            updatePanelViewportHeight(panel);
+            queuePanelSectionState(panel);
+        });
     });
 }
 
@@ -292,6 +372,9 @@ function setupMemoryLightbox() {
         if (event.key === "Escape" && activityModal?.classList.contains("open")) {
             closeActivityModal();
         }
+        if (event.key === "Escape" && wishFormModal?.classList.contains("open")) {
+            closeWishFormModal();
+        }
     });
 }
 
@@ -452,6 +535,33 @@ function setupActivityModal() {
     activityModal.addEventListener("click", (event) => {
         if (event.target === activityModal) {
             closeActivityModal();
+        }
+    });
+}
+
+function openWishFormModal() {
+    if (!wishFormModal) return;
+    wishFormModal.classList.add("open");
+    wishFormModal.setAttribute("aria-hidden", "false");
+    syncModalBodyLock();
+    setTimeout(() => wishName?.focus(), 0);
+}
+
+function closeWishFormModal() {
+    if (!wishFormModal) return;
+    wishFormModal.classList.remove("open");
+    wishFormModal.setAttribute("aria-hidden", "true");
+    syncModalBodyLock();
+}
+
+function setupWishFormModal() {
+    if (!openWishFormModalBtn || !wishFormModal || !wishFormModalClose) return;
+
+    openWishFormModalBtn.addEventListener("click", openWishFormModal);
+    wishFormModalClose.addEventListener("click", closeWishFormModal);
+    wishFormModal.addEventListener("click", (event) => {
+        if (event.target === wishFormModal) {
+            closeWishFormModal();
         }
     });
 }
@@ -723,6 +833,21 @@ function sanitizeWishValue(value) {
     return (value || "").trim().replace(/\s+/g, " ");
 }
 
+function formatIstTimestamp(dateInput = Date.now()) {
+    const date = dateInput instanceof Date ? dateInput : new Date(dateInput);
+    const formatter = new Intl.DateTimeFormat("en-IN", {
+        timeZone: "Asia/Kolkata",
+        day: "2-digit",
+        month: "short",
+        year: "numeric",
+        hour: "2-digit",
+        minute: "2-digit",
+        second: "2-digit",
+        hour12: true
+    });
+    return `${formatter.format(date).replace(",", "")} IST`;
+}
+
 function setWishStatus(message, isError = false) {
     if (!wishFormStatus) return;
     wishFormStatus.textContent = message;
@@ -743,7 +868,8 @@ function loadWishesFromStorage() {
                 id: String(entry.id || `${Date.now()}-${Math.random().toString(16).slice(2, 8)}`),
                 name: sanitizeWishValue(entry.name),
                 text: sanitizeWishValue(entry.text),
-                createdAt: entry.createdAt || new Date().toISOString()
+                createdAt: entry.createdAt || new Date().toISOString(),
+                createdAtIst: sanitizeWishValue(entry.createdAtIst) || formatIstTimestamp(entry.createdAt || Date.now())
             }))
             .filter((entry) => entry.name && entry.text);
     } catch (error) {
@@ -759,14 +885,46 @@ function saveWishesToStorage() {
     }
 }
 
-function pickRandomWishes(maxCount = 8) {
-    if (!wishesData.length) return [];
-    const shuffled = [...wishesData];
-    for (let i = shuffled.length - 1; i > 0; i -= 1) {
+function shuffleArray(items) {
+    const copy = [...items];
+    for (let i = copy.length - 1; i > 0; i -= 1) {
         const randomIndex = Math.floor(Math.random() * (i + 1));
-        [shuffled[i], shuffled[randomIndex]] = [shuffled[randomIndex], shuffled[i]];
+        [copy[i], copy[randomIndex]] = [copy[randomIndex], copy[i]];
     }
-    return shuffled.slice(0, Math.min(maxCount, shuffled.length));
+    return copy;
+}
+
+function rebuildWishCycleDeck() {
+    wishCycleDeck = shuffleArray(wishesData.map((entry) => entry.id));
+    wishCycleCursor = 0;
+}
+
+function pickCycledWishes(maxCount = 10) {
+    if (!wishesData.length) return [];
+
+    const ids = new Set(wishesData.map((entry) => entry.id));
+    const deckIsInvalid =
+        wishCycleDeck.length !== wishesData.length ||
+        wishCycleDeck.some((id) => !ids.has(id));
+
+    if (deckIsInvalid || !wishCycleDeck.length) {
+        rebuildWishCycleDeck();
+    }
+
+    const wanted = Math.min(maxCount, wishesData.length);
+    const selectedIds = [];
+
+    while (selectedIds.length < wanted) {
+        if (wishCycleCursor >= wishCycleDeck.length) {
+            wishCycleDeck = shuffleArray(wishCycleDeck);
+            wishCycleCursor = 0;
+        }
+        selectedIds.push(wishCycleDeck[wishCycleCursor]);
+        wishCycleCursor += 1;
+    }
+
+    const byId = new Map(wishesData.map((entry) => [entry.id, entry]));
+    return selectedIds.map((id) => byId.get(id)).filter(Boolean);
 }
 
 function findWishBubblePosition(width, height, bubbleWidth, bubbleHeight, placedRects) {
@@ -1008,7 +1166,7 @@ function renderWishBubbles() {
     if (!wishBubbleField) return;
     wishBubbleField.innerHTML = "";
 
-    const visibleWishes = pickRandomWishes(8);
+    const visibleWishes = pickCycledWishes(10);
     if (!visibleWishes.length) {
         const empty = document.createElement("p");
         empty.className = "wish-bubble-empty";
@@ -1018,7 +1176,7 @@ function renderWishBubbles() {
     }
 
     const fieldWidth = wishBubbleField.clientWidth || 680;
-    const fieldHeight = wishBubbleField.clientHeight || 360;
+    const fieldHeight = wishBubbleField.clientHeight || 520;
     const placedRects = [];
 
     visibleWishes.forEach((entry) => {
@@ -1048,10 +1206,15 @@ function renderWishBubbles() {
 
         bubble.appendChild(head);
         bubble.appendChild(wishTitle);
+
+        const timestamp = document.createElement("p");
+        timestamp.className = "wish-bubble-time";
+        timestamp.textContent = entry.createdAtIst || formatIstTimestamp(entry.createdAt || Date.now());
+        bubble.appendChild(timestamp);
         wishBubbleField.appendChild(bubble);
 
-        const bubbleWidth = bubble.offsetWidth || 220;
-        const bubbleHeight = bubble.offsetHeight || 130;
+        const bubbleWidth = bubble.offsetWidth || 188;
+        const bubbleHeight = bubble.offsetHeight || 108;
         const position = findWishBubblePosition(fieldWidth, fieldHeight, bubbleWidth, bubbleHeight, placedRects);
 
         bubble.style.left = `${position.left}px`;
@@ -1085,13 +1248,16 @@ function handleWishSubmit(event) {
         id: `${Date.now()}-${Math.random().toString(16).slice(2, 8)}`,
         name: nameValue,
         text: wishValue,
-        createdAt: new Date().toISOString()
+        createdAt: new Date().toISOString(),
+        createdAtIst: formatIstTimestamp(Date.now())
     });
 
     saveWishesToStorage();
+    rebuildWishCycleDeck();
     setWishStatus("Wish sent. Tap any floating bubble to pop it.");
     wishesForm.reset();
     renderWishBubbles();
+    closeWishFormModal();
 }
 
 function toggleWishesPanel() {
@@ -1103,17 +1269,19 @@ function toggleWishesPanel() {
         requestAnimationFrame(renderWishBubbles);
         setWishStatus(
             wishesData.length
-                ? `Showing ${Math.min(8, wishesData.length)} of ${wishesData.length} wishes in dreamy random mode.`
+                ? `Showing ${Math.min(10, wishesData.length)} of ${wishesData.length} wishes in dreamy cycle mode.`
                 : "Be the first to leave a blessing."
         );
         weddingWishesPanel.scrollIntoView({ behavior: "smooth", block: "start" });
     }
+    queuePanelSectionState(document.getElementById("countdown"));
 }
 
 function setupWeddingWishes() {
     if (!openWishesBtn || !weddingWishesPanel || !wishesForm || !wishBubbleField) return;
 
     wishesData = loadWishesFromStorage();
+    rebuildWishCycleDeck();
     setWishStatus(
         wishesData.length
             ? `${wishesData.length} wish${wishesData.length === 1 ? "" : "es"} saved. Open Wishes Garden to view.`
@@ -1140,10 +1308,12 @@ secretInput.addEventListener("keydown", (event) => {
 });
 
 bindTabs();
+setupTabSectionScrollExperience();
 activateTab("home");
 setupRevealAnimations();
 setupMemoryLightbox();
 setupActivityModal();
+setupWishFormModal();
 setupWeddingItinerary();
 setupWeddingWishes();
 setupBackgroundMusic();
