@@ -42,6 +42,13 @@ const itineraryMapInlineLink = document.getElementById("itineraryMapInlineLink")
 const itineraryMap = document.getElementById("itineraryMap");
 const itineraryTimeline = document.getElementById("itineraryTimeline");
 const itineraryDetails = document.getElementById("itineraryDetails");
+const openWishesBtn = document.getElementById("openWishesBtn");
+const weddingWishesPanel = document.getElementById("weddingWishesPanel");
+const wishesForm = document.getElementById("wishesForm");
+const wishName = document.getElementById("wishName");
+const wishText = document.getElementById("wishText");
+const wishFormStatus = document.getElementById("wishFormStatus");
+const wishBubbleField = document.getElementById("wishBubbleField");
 const activityModal = document.getElementById("activityModal");
 const activityModalClose = document.getElementById("activityModalClose");
 const activityModalTitle = document.getElementById("activityModalTitle");
@@ -54,7 +61,11 @@ const bgMusic = document.getElementById("bgMusic");
 const musicToggleBtn = document.getElementById("musicToggleBtn");
 const musicStatus = document.getElementById("musicStatus");
 const defaultMusicTracks = ["audio/romantic.mp4"];
+const wishesStorageKey = "wedding_wishes_v1";
 let activeItineraryItem = null;
+let wishesData = [];
+let wishesRefreshTimer = null;
+let popAudioCtx = null;
 
 function syncModalBodyLock() {
     const hasOpenModal = Boolean(document.querySelector(".lightbox.open"));
@@ -708,6 +719,419 @@ function setupBackgroundMusic() {
     updateMusicUi(false);
 }
 
+function sanitizeWishValue(value) {
+    return (value || "").trim().replace(/\s+/g, " ");
+}
+
+function setWishStatus(message, isError = false) {
+    if (!wishFormStatus) return;
+    wishFormStatus.textContent = message;
+    wishFormStatus.classList.toggle("error", Boolean(isError));
+    wishFormStatus.classList.toggle("success", !isError);
+}
+
+function loadWishesFromStorage() {
+    try {
+        const raw = localStorage.getItem(wishesStorageKey);
+        if (!raw) return [];
+        const parsed = JSON.parse(raw);
+        if (!Array.isArray(parsed)) return [];
+
+        return parsed
+            .filter((entry) => entry && typeof entry === "object")
+            .map((entry) => ({
+                id: String(entry.id || `${Date.now()}-${Math.random().toString(16).slice(2, 8)}`),
+                name: sanitizeWishValue(entry.name),
+                text: sanitizeWishValue(entry.text),
+                createdAt: entry.createdAt || new Date().toISOString()
+            }))
+            .filter((entry) => entry.name && entry.text);
+    } catch (error) {
+        return [];
+    }
+}
+
+function saveWishesToStorage() {
+    try {
+        localStorage.setItem(wishesStorageKey, JSON.stringify(wishesData.slice(0, 200)));
+    } catch (error) {
+        // Ignore storage quota/private mode write errors.
+    }
+}
+
+function pickRandomWishes(maxCount = 8) {
+    if (!wishesData.length) return [];
+    const shuffled = [...wishesData];
+    for (let i = shuffled.length - 1; i > 0; i -= 1) {
+        const randomIndex = Math.floor(Math.random() * (i + 1));
+        [shuffled[i], shuffled[randomIndex]] = [shuffled[randomIndex], shuffled[i]];
+    }
+    return shuffled.slice(0, Math.min(maxCount, shuffled.length));
+}
+
+function findWishBubblePosition(width, height, bubbleWidth, bubbleHeight, placedRects) {
+    const safeWidth = Math.max(width - bubbleWidth - 14, 8);
+    const safeHeight = Math.max(height - bubbleHeight - 14, 8);
+    let best = { left: 7, top: 7, score: Number.POSITIVE_INFINITY };
+
+    for (let i = 0; i < 25; i += 1) {
+        const left = 7 + Math.random() * safeWidth;
+        const top = 7 + Math.random() * safeHeight;
+        const currentRect = { left, top, right: left + bubbleWidth, bottom: top + bubbleHeight };
+
+        let overlapScore = 0;
+        placedRects.forEach((rect) => {
+            const overlapX = Math.max(0, Math.min(currentRect.right, rect.right) - Math.max(currentRect.left, rect.left));
+            const overlapY = Math.max(0, Math.min(currentRect.bottom, rect.bottom) - Math.max(currentRect.top, rect.top));
+            overlapScore += overlapX * overlapY;
+        });
+
+        if (overlapScore < best.score) {
+            best = { left, top, score: overlapScore };
+            if (overlapScore === 0) break;
+        }
+    }
+
+    return { left: best.left, top: best.top };
+}
+
+function playWishPopSound() {
+    const Ctx = window.AudioContext || window.webkitAudioContext;
+    if (!Ctx) return;
+
+    if (!popAudioCtx) {
+        popAudioCtx = new Ctx();
+    }
+
+    if (popAudioCtx.state === "suspended") {
+        popAudioCtx.resume();
+    }
+
+    const now = popAudioCtx.currentTime;
+    const oscillator = popAudioCtx.createOscillator();
+    const gainNode = popAudioCtx.createGain();
+
+    oscillator.type = "triangle";
+    oscillator.frequency.setValueAtTime(180, now);
+    oscillator.frequency.exponentialRampToValueAtTime(70, now + 0.12);
+
+    gainNode.gain.setValueAtTime(0.18, now);
+    gainNode.gain.exponentialRampToValueAtTime(0.001, now + 0.12);
+
+    oscillator.connect(gainNode);
+    gainNode.connect(popAudioCtx.destination);
+    oscillator.start(now);
+    oscillator.stop(now + 0.12);
+}
+
+// Lightweight MD5 implementation for deterministic Gravatar hashes.
+function md5(input) {
+    function rotateLeft(lValue, iShiftBits) {
+        return (lValue << iShiftBits) | (lValue >>> (32 - iShiftBits));
+    }
+
+    function addUnsigned(lX, lY) {
+        const lX8 = lX & 0x80000000;
+        const lY8 = lY & 0x80000000;
+        const lX4 = lX & 0x40000000;
+        const lY4 = lY & 0x40000000;
+        const lResult = (lX & 0x3fffffff) + (lY & 0x3fffffff);
+        if (lX4 & lY4) return lResult ^ 0x80000000 ^ lX8 ^ lY8;
+        if (lX4 | lY4) {
+            if (lResult & 0x40000000) return lResult ^ 0xc0000000 ^ lX8 ^ lY8;
+            return lResult ^ 0x40000000 ^ lX8 ^ lY8;
+        }
+        return lResult ^ lX8 ^ lY8;
+    }
+
+    function F(x, y, z) { return (x & y) | (~x & z); }
+    function G(x, y, z) { return (x & z) | (y & ~z); }
+    function H(x, y, z) { return x ^ y ^ z; }
+    function I(x, y, z) { return y ^ (x | ~z); }
+    function FF(a, b, c, d, x, s, ac) { a = addUnsigned(a, addUnsigned(addUnsigned(F(b, c, d), x), ac)); return addUnsigned(rotateLeft(a, s), b); }
+    function GG(a, b, c, d, x, s, ac) { a = addUnsigned(a, addUnsigned(addUnsigned(G(b, c, d), x), ac)); return addUnsigned(rotateLeft(a, s), b); }
+    function HH(a, b, c, d, x, s, ac) { a = addUnsigned(a, addUnsigned(addUnsigned(H(b, c, d), x), ac)); return addUnsigned(rotateLeft(a, s), b); }
+    function II(a, b, c, d, x, s, ac) { a = addUnsigned(a, addUnsigned(addUnsigned(I(b, c, d), x), ac)); return addUnsigned(rotateLeft(a, s), b); }
+
+    function convertToWordArray(value) {
+        const lWordCount = (((value.length + 8) - ((value.length + 8) % 64)) / 64 + 1) * 16;
+        const words = new Array(lWordCount - 1);
+        let byteCount = 0;
+        while (byteCount < value.length) {
+            const wordCount = (byteCount - (byteCount % 4)) / 4;
+            const bytePosition = (byteCount % 4) * 8;
+            words[wordCount] = words[wordCount] | (value.charCodeAt(byteCount) << bytePosition);
+            byteCount += 1;
+        }
+        const wordCount = (byteCount - (byteCount % 4)) / 4;
+        const bytePosition = (byteCount % 4) * 8;
+        words[wordCount] = words[wordCount] | (0x80 << bytePosition);
+        words[lWordCount - 2] = value.length << 3;
+        words[lWordCount - 1] = value.length >>> 29;
+        return words;
+    }
+
+    function wordToHex(value) {
+        let output = "";
+        for (let i = 0; i <= 3; i += 1) {
+            const temp = (value >>> (i * 8)) & 255;
+            output += (`0${temp.toString(16)}`).slice(-2);
+        }
+        return output;
+    }
+
+    function utf8Encode(value) {
+        return unescape(encodeURIComponent(value));
+    }
+
+    const x = convertToWordArray(utf8Encode(input));
+    let a = 0x67452301;
+    let b = 0xefcdab89;
+    let c = 0x98badcfe;
+    let d = 0x10325476;
+
+    for (let k = 0; k < x.length; k += 16) {
+        const AA = a;
+        const BB = b;
+        const CC = c;
+        const DD = d;
+        a = FF(a, b, c, d, x[k + 0], 7, 0xd76aa478);
+        d = FF(d, a, b, c, x[k + 1], 12, 0xe8c7b756);
+        c = FF(c, d, a, b, x[k + 2], 17, 0x242070db);
+        b = FF(b, c, d, a, x[k + 3], 22, 0xc1bdceee);
+        a = FF(a, b, c, d, x[k + 4], 7, 0xf57c0faf);
+        d = FF(d, a, b, c, x[k + 5], 12, 0x4787c62a);
+        c = FF(c, d, a, b, x[k + 6], 17, 0xa8304613);
+        b = FF(b, c, d, a, x[k + 7], 22, 0xfd469501);
+        a = FF(a, b, c, d, x[k + 8], 7, 0x698098d8);
+        d = FF(d, a, b, c, x[k + 9], 12, 0x8b44f7af);
+        c = FF(c, d, a, b, x[k + 10], 17, 0xffff5bb1);
+        b = FF(b, c, d, a, x[k + 11], 22, 0x895cd7be);
+        a = FF(a, b, c, d, x[k + 12], 7, 0x6b901122);
+        d = FF(d, a, b, c, x[k + 13], 12, 0xfd987193);
+        c = FF(c, d, a, b, x[k + 14], 17, 0xa679438e);
+        b = FF(b, c, d, a, x[k + 15], 22, 0x49b40821);
+        a = GG(a, b, c, d, x[k + 1], 5, 0xf61e2562);
+        d = GG(d, a, b, c, x[k + 6], 9, 0xc040b340);
+        c = GG(c, d, a, b, x[k + 11], 14, 0x265e5a51);
+        b = GG(b, c, d, a, x[k + 0], 20, 0xe9b6c7aa);
+        a = GG(a, b, c, d, x[k + 5], 5, 0xd62f105d);
+        d = GG(d, a, b, c, x[k + 10], 9, 0x02441453);
+        c = GG(c, d, a, b, x[k + 15], 14, 0xd8a1e681);
+        b = GG(b, c, d, a, x[k + 4], 20, 0xe7d3fbc8);
+        a = GG(a, b, c, d, x[k + 9], 5, 0x21e1cde6);
+        d = GG(d, a, b, c, x[k + 14], 9, 0xc33707d6);
+        c = GG(c, d, a, b, x[k + 3], 14, 0xf4d50d87);
+        b = GG(b, c, d, a, x[k + 8], 20, 0x455a14ed);
+        a = GG(a, b, c, d, x[k + 13], 5, 0xa9e3e905);
+        d = GG(d, a, b, c, x[k + 2], 9, 0xfcefa3f8);
+        c = GG(c, d, a, b, x[k + 7], 14, 0x676f02d9);
+        b = GG(b, c, d, a, x[k + 12], 20, 0x8d2a4c8a);
+        a = HH(a, b, c, d, x[k + 5], 4, 0xfffa3942);
+        d = HH(d, a, b, c, x[k + 8], 11, 0x8771f681);
+        c = HH(c, d, a, b, x[k + 11], 16, 0x6d9d6122);
+        b = HH(b, c, d, a, x[k + 14], 23, 0xfde5380c);
+        a = HH(a, b, c, d, x[k + 1], 4, 0xa4beea44);
+        d = HH(d, a, b, c, x[k + 4], 11, 0x4bdecfa9);
+        c = HH(c, d, a, b, x[k + 7], 16, 0xf6bb4b60);
+        b = HH(b, c, d, a, x[k + 10], 23, 0xbebfbc70);
+        a = HH(a, b, c, d, x[k + 13], 4, 0x289b7ec6);
+        d = HH(d, a, b, c, x[k + 0], 11, 0xeaa127fa);
+        c = HH(c, d, a, b, x[k + 3], 16, 0xd4ef3085);
+        b = HH(b, c, d, a, x[k + 6], 23, 0x04881d05);
+        a = HH(a, b, c, d, x[k + 9], 4, 0xd9d4d039);
+        d = HH(d, a, b, c, x[k + 12], 11, 0xe6db99e5);
+        c = HH(c, d, a, b, x[k + 15], 16, 0x1fa27cf8);
+        b = HH(b, c, d, a, x[k + 2], 23, 0xc4ac5665);
+        a = II(a, b, c, d, x[k + 0], 6, 0xf4292244);
+        d = II(d, a, b, c, x[k + 7], 10, 0x432aff97);
+        c = II(c, d, a, b, x[k + 14], 15, 0xab9423a7);
+        b = II(b, c, d, a, x[k + 5], 21, 0xfc93a039);
+        a = II(a, b, c, d, x[k + 12], 6, 0x655b59c3);
+        d = II(d, a, b, c, x[k + 3], 10, 0x8f0ccc92);
+        c = II(c, d, a, b, x[k + 10], 15, 0xffeff47d);
+        b = II(b, c, d, a, x[k + 1], 21, 0x85845dd1);
+        a = II(a, b, c, d, x[k + 8], 6, 0x6fa87e4f);
+        d = II(d, a, b, c, x[k + 15], 10, 0xfe2ce6e0);
+        c = II(c, d, a, b, x[k + 6], 15, 0xa3014314);
+        b = II(b, c, d, a, x[k + 13], 21, 0x4e0811a1);
+        a = II(a, b, c, d, x[k + 4], 6, 0xf7537e82);
+        d = II(d, a, b, c, x[k + 11], 10, 0xbd3af235);
+        c = II(c, d, a, b, x[k + 2], 15, 0x2ad7d2bb);
+        b = II(b, c, d, a, x[k + 9], 21, 0xeb86d391);
+        a = addUnsigned(a, AA);
+        b = addUnsigned(b, BB);
+        c = addUnsigned(c, CC);
+        d = addUnsigned(d, DD);
+    }
+
+    return `${wordToHex(a)}${wordToHex(b)}${wordToHex(c)}${wordToHex(d)}`.toLowerCase();
+}
+
+function buildGravatarUrl(name) {
+    const identity = `${sanitizeWishValue(name).toLowerCase().replace(/\s+/g, ".")}@wish.local`;
+    const hash = md5(identity);
+    return `https://www.gravatar.com/avatar/${hash}?s=96&d=identicon&r=g`;
+}
+
+function burstWishBubble(bubble) {
+    if (!wishBubbleField || !bubble || bubble.classList.contains("popping")) return;
+    bubble.classList.add("popping");
+    playWishPopSound();
+
+    const bubbleRect = bubble.getBoundingClientRect();
+    const fieldRect = wishBubbleField.getBoundingClientRect();
+    const originX = bubbleRect.left - fieldRect.left + bubbleRect.width / 2;
+    const originY = bubbleRect.top - fieldRect.top + bubbleRect.height / 2;
+    const shardCount = 8;
+
+    for (let index = 0; index < shardCount; index += 1) {
+        const angle = (Math.PI * 2 * index) / shardCount;
+        const distance = 16 + Math.random() * 34;
+        const shard = document.createElement("span");
+        shard.className = "wish-pop-piece";
+        shard.style.left = `${originX}px`;
+        shard.style.top = `${originY}px`;
+        shard.style.setProperty("--dx", `${Math.cos(angle) * distance}px`);
+        shard.style.setProperty("--dy", `${Math.sin(angle) * distance}px`);
+        wishBubbleField.appendChild(shard);
+        setTimeout(() => shard.remove(), 540);
+    }
+
+    setTimeout(() => {
+        bubble.remove();
+        renderWishBubbles();
+    }, 240);
+}
+
+function renderWishBubbles() {
+    if (!wishBubbleField) return;
+    wishBubbleField.innerHTML = "";
+
+    const visibleWishes = pickRandomWishes(8);
+    if (!visibleWishes.length) {
+        const empty = document.createElement("p");
+        empty.className = "wish-bubble-empty";
+        empty.textContent = "No wishes yet. Add one and watch it float.";
+        wishBubbleField.appendChild(empty);
+        return;
+    }
+
+    const fieldWidth = wishBubbleField.clientWidth || 680;
+    const fieldHeight = wishBubbleField.clientHeight || 360;
+    const placedRects = [];
+
+    visibleWishes.forEach((entry) => {
+        const bubble = document.createElement("button");
+        bubble.type = "button";
+        bubble.className = "wish-bubble";
+        bubble.setAttribute("aria-label", `Wish by ${entry.name}`);
+
+        const head = document.createElement("div");
+        head.className = "wish-bubble-head";
+
+        const avatar = document.createElement("img");
+        avatar.className = "wish-bubble-avatar";
+        avatar.src = buildGravatarUrl(entry.name);
+        avatar.alt = `${entry.name} avatar`;
+
+        const name = document.createElement("p");
+        name.className = "wish-bubble-name";
+        name.textContent = `- ${entry.name}`;
+
+        head.appendChild(avatar);
+        head.appendChild(name);
+
+        const wishTitle = document.createElement("p");
+        wishTitle.className = "wish-bubble-wish";
+        wishTitle.textContent = entry.text;
+
+        bubble.appendChild(head);
+        bubble.appendChild(wishTitle);
+        wishBubbleField.appendChild(bubble);
+
+        const bubbleWidth = bubble.offsetWidth || 220;
+        const bubbleHeight = bubble.offsetHeight || 130;
+        const position = findWishBubblePosition(fieldWidth, fieldHeight, bubbleWidth, bubbleHeight, placedRects);
+
+        bubble.style.left = `${position.left}px`;
+        bubble.style.top = `${position.top}px`;
+        bubble.style.setProperty("--float-duration", `${7 + Math.random() * 6}s`);
+        bubble.style.animationDelay = `-${Math.random() * 4.5}s`;
+
+        placedRects.push({
+            left: position.left,
+            top: position.top,
+            right: position.left + bubbleWidth,
+            bottom: position.top + bubbleHeight
+        });
+
+        bubble.addEventListener("click", () => burstWishBubble(bubble));
+    });
+}
+
+function handleWishSubmit(event) {
+    event.preventDefault();
+
+    const nameValue = sanitizeWishValue(wishName?.value);
+    const wishValue = sanitizeWishValue(wishText?.value);
+
+    if (!nameValue || !wishValue) {
+        setWishStatus("Please enter both your name and a well wish.", true);
+        return;
+    }
+
+    wishesData.unshift({
+        id: `${Date.now()}-${Math.random().toString(16).slice(2, 8)}`,
+        name: nameValue,
+        text: wishValue,
+        createdAt: new Date().toISOString()
+    });
+
+    saveWishesToStorage();
+    setWishStatus("Wish sent. Tap any floating bubble to pop it.");
+    wishesForm.reset();
+    renderWishBubbles();
+}
+
+function toggleWishesPanel() {
+    if (!weddingWishesPanel || !openWishesBtn) return;
+    const isOpen = weddingWishesPanel.classList.toggle("open");
+    openWishesBtn.setAttribute("aria-expanded", isOpen ? "true" : "false");
+
+    if (isOpen) {
+        requestAnimationFrame(renderWishBubbles);
+        setWishStatus(
+            wishesData.length
+                ? `Showing ${Math.min(8, wishesData.length)} of ${wishesData.length} wishes in dreamy random mode.`
+                : "Be the first to leave a blessing."
+        );
+        weddingWishesPanel.scrollIntoView({ behavior: "smooth", block: "start" });
+    }
+}
+
+function setupWeddingWishes() {
+    if (!openWishesBtn || !weddingWishesPanel || !wishesForm || !wishBubbleField) return;
+
+    wishesData = loadWishesFromStorage();
+    setWishStatus(
+        wishesData.length
+            ? `${wishesData.length} wish${wishesData.length === 1 ? "" : "es"} saved. Open Wishes Garden to view.`
+            : "Be the first to leave a blessing."
+    );
+
+    openWishesBtn.addEventListener("click", toggleWishesPanel);
+    wishesForm.addEventListener("submit", handleWishSubmit);
+
+    if (!wishesRefreshTimer) {
+        wishesRefreshTimer = setInterval(() => {
+            if (weddingWishesPanel.classList.contains("open")) {
+                renderWishBubbles();
+            }
+        }, 9000);
+    }
+}
+
 unlockBtn.addEventListener("click", unlockLoveLetter);
 secretInput.addEventListener("keydown", (event) => {
     if (event.key === "Enter") {
@@ -721,6 +1145,7 @@ setupRevealAnimations();
 setupMemoryLightbox();
 setupActivityModal();
 setupWeddingItinerary();
+setupWeddingWishes();
 setupBackgroundMusic();
 updateTimers();
 setInterval(updateTimers, 1000);

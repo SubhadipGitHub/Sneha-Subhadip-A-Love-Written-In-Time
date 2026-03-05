@@ -410,6 +410,171 @@ p {
     color: #ffe3da;
 }
 
+.wishes-open-btn {
+    margin-top: 0.8rem;
+}
+
+.wishes-panel {
+    margin-top: 1rem;
+    display: none;
+}
+
+.wishes-panel.open {
+    display: block;
+}
+
+.wishes-form {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 0.7rem;
+    align-items: end;
+}
+
+.wishes-field {
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+}
+
+.wishes-field span {
+    font-size: 0.8rem;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    color: #ffdbe5;
+}
+
+.wishes-field input,
+.wishes-field textarea {
+    border: 1px solid rgba(255, 255, 255, 0.28);
+    background: rgba(7, 3, 6, 0.38);
+    color: var(--text);
+    border-radius: 0.7rem;
+    padding: 0.68rem 0.8rem;
+    font: inherit;
+    resize: vertical;
+}
+
+.wishes-field textarea {
+    min-height: 78px;
+}
+
+.wishes-field input::placeholder,
+.wishes-field textarea::placeholder {
+    color: #ebcad4;
+}
+
+.wishes-form .primary-btn {
+    min-height: 42px;
+}
+
+.wish-form-status {
+    margin: 0.85rem 0 0;
+    min-height: 1.8rem;
+    color: #ffeaf1;
+    font-weight: 600;
+}
+
+.wish-form-status.error {
+    color: #ffd2df;
+}
+
+.wish-form-status.success {
+    color: #fff1d9;
+}
+
+.wish-bubble-field {
+    position: relative;
+    overflow: hidden;
+    margin-top: 0.35rem;
+    min-height: 360px;
+    border-radius: 1rem;
+    border: 1px solid rgba(255, 255, 255, 0.28);
+    background:
+        radial-gradient(circle at 16% 16%, rgba(255, 227, 238, 0.22), transparent 34%),
+        radial-gradient(circle at 84% 18%, rgba(189, 205, 255, 0.2), transparent 30%),
+        linear-gradient(150deg, rgba(255, 245, 247, 0.14), rgba(13, 4, 10, 0.55));
+}
+
+.wish-bubble-empty {
+    margin: 0;
+    min-height: 360px;
+    display: grid;
+    place-items: center;
+    color: #ffe3eb;
+    padding: 1rem;
+    text-align: center;
+}
+
+.wish-bubble {
+    position: absolute;
+    width: clamp(180px, 24vw, 270px);
+    min-height: 118px;
+    border-radius: 1.25rem;
+    padding: 0.72rem 0.8rem 0.74rem;
+    border: 1px solid rgba(255, 255, 255, 0.4);
+    background: linear-gradient(145deg, rgba(255, 255, 255, 0.22), rgba(255, 201, 219, 0.14));
+    box-shadow: 0 14px 28px rgba(0, 0, 0, 0.32);
+    backdrop-filter: blur(5px);
+    cursor: pointer;
+    animation: wishBubbleFloat var(--float-duration, 9s) ease-in-out infinite;
+    transition: transform 0.25s ease, box-shadow 0.25s ease, opacity 0.25s ease;
+}
+
+.wish-bubble:hover,
+.wish-bubble:focus-visible {
+    transform: translateY(-4px) scale(1.02);
+    box-shadow: 0 20px 34px rgba(0, 0, 0, 0.42);
+    outline: none;
+}
+
+.wish-bubble-head {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    margin-bottom: 0.45rem;
+}
+
+.wish-bubble-avatar {
+    width: 34px;
+    height: 34px;
+    border-radius: 999px;
+    object-fit: cover;
+    border: 1px solid rgba(255, 255, 255, 0.48);
+    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.28);
+    flex: 0 0 auto;
+}
+
+.wish-bubble-wish {
+    margin: 0 0 0.1rem;
+    font-family: "Cinzel", serif;
+    font-size: 1rem;
+    color: #fff5f9;
+    line-height: 1.35;
+}
+
+.wish-bubble-name {
+    margin: 0;
+    color: #ffd5e2;
+    font-size: 0.72rem;
+    letter-spacing: 0.11em;
+    text-transform: uppercase;
+}
+
+.wish-bubble.popping {
+    animation: wishBubbleBurst 220ms ease forwards;
+    pointer-events: none;
+}
+
+.wish-pop-piece {
+    position: absolute;
+    width: 8px;
+    height: 8px;
+    border-radius: 999px;
+    background: rgba(255, 220, 234, 0.95);
+    pointer-events: none;
+    animation: wishPopShard 520ms ease-out forwards;
+}
+
 .itinerary-shell {
     margin-top: 1rem;
 }
@@ -1912,6 +2077,38 @@ input[type="password"]::placeholder {
     }
 }
 
+@keyframes wishBubbleFloat {
+    0%,
+    100% {
+        transform: translate3d(0, 0, 0);
+    }
+    50% {
+        transform: translate3d(8px, -14px, 0);
+    }
+}
+
+@keyframes wishBubbleBurst {
+    0% {
+        transform: scale(1);
+        opacity: 1;
+    }
+    100% {
+        transform: scale(0.6);
+        opacity: 0;
+    }
+}
+
+@keyframes wishPopShard {
+    0% {
+        opacity: 0.95;
+        transform: translate(0, 0) scale(1);
+    }
+    100% {
+        opacity: 0;
+        transform: translate(var(--dx, 0px), var(--dy, -18px)) scale(0.2);
+    }
+}
+
 @media (max-width: 860px) {
     .memory-grid {
         grid-template-columns: 1fr;
@@ -1940,6 +2137,14 @@ input[type="password"]::placeholder {
 
     .itinerary-grid {
         grid-template-columns: 1fr;
+    }
+
+    .wishes-form {
+        grid-template-columns: 1fr;
+    }
+
+    .wish-bubble-field {
+        min-height: 320px;
     }
 
     .about-split {
@@ -2022,5 +2227,9 @@ input[type="password"]::placeholder {
     .reveal {
         opacity: 1;
         transform: none;
+    }
+
+    .wish-bubble {
+        animation: none;
     }
 }
