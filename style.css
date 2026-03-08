@@ -463,12 +463,6 @@ p {
     display: block;
 }
 
-.wishes-panel-actions {
-    display: flex;
-    justify-content: center;
-    margin-bottom: 0.1rem;
-}
-
 .wishes-form {
     display: grid;
     gap: 0.7rem;
@@ -517,6 +511,85 @@ p {
     min-height: 1.8rem;
     color: #ffeaf1;
     font-weight: 600;
+}
+
+.wish-share-panel {
+    position: relative;
+    width: min(190px, 100%);
+    margin: 0.95rem auto 0.45rem;
+    padding: 0.72rem 0.65rem 0.62rem;
+    border-radius: 1rem;
+    border: 1px solid rgba(255, 255, 255, 0.28);
+    background:
+        radial-gradient(circle at 10% 12%, rgba(255, 214, 229, 0.26), transparent 55%),
+        radial-gradient(circle at 88% 92%, rgba(174, 208, 255, 0.2), transparent 48%),
+        linear-gradient(155deg, rgba(33, 12, 24, 0.66), rgba(19, 8, 16, 0.8));
+    box-shadow: 0 14px 28px rgba(0, 0, 0, 0.28);
+    text-align: center;
+    overflow: hidden;
+}
+
+.wish-share-panel::before {
+    content: "";
+    position: absolute;
+    inset: -24% -40%;
+    background: linear-gradient(125deg, transparent 42%, rgba(255, 255, 255, 0.34), transparent 58%);
+    opacity: 0.32;
+    transform: translateX(-42%);
+    animation: wishQrShimmer 4.8s ease-in-out infinite;
+    pointer-events: none;
+}
+
+.wish-share-title {
+    margin: 0.28rem 0 0;
+    color: #ffe9f1;
+    font-weight: 600;
+    font-size: 0.82rem;
+    line-height: 1.35;
+    letter-spacing: 0.015em;
+}
+
+.wish-share-link {
+    display: inline-block;
+    margin-top: 0.35rem;
+    color: #fff7e0;
+    text-decoration: underline;
+    text-underline-offset: 2px;
+}
+
+.wish-share-qr {
+    position: relative;
+    display: block;
+    width: 126px;
+    height: 126px;
+    margin: 0 auto;
+    border-radius: 0.82rem;
+    background: #fff;
+    padding: 0.35rem;
+    border: 1px solid rgba(255, 255, 255, 0.82);
+    box-shadow:
+        0 12px 20px rgba(0, 0, 0, 0.24),
+        0 0 0 5px rgba(255, 255, 255, 0.06);
+    animation: wishQrFloat 3.6s ease-in-out infinite;
+    transition: transform 0.35s ease, box-shadow 0.35s ease;
+}
+
+.wish-share-panel:hover .wish-share-qr {
+    transform: translateY(-3px) scale(1.02);
+    box-shadow:
+        0 18px 24px rgba(0, 0, 0, 0.32),
+        0 0 0 6px rgba(255, 255, 255, 0.08);
+}
+
+@keyframes wishQrFloat {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-5px); }
+}
+
+@keyframes wishQrShimmer {
+    0% { transform: translateX(-42%) rotate(0.001deg); opacity: 0.2; }
+    55% { opacity: 0.42; }
+    100% { transform: translateX(42%) rotate(0.001deg); opacity: 0.2; }
 }
 
 .wish-form-status.error {

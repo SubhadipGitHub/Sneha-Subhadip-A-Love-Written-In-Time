@@ -1,5 +1,5 @@
-const relationshipStartDate = new Date("2025-03-01T00:00:00").getTime();
-const weddingDate = new Date("2026-12-11T00:00:00").getTime();
+const relationshipStartDate = new Date("2025-03-01T18:00:00").getTime();
+const weddingDate = new Date("2026-12-11T21:00:00").getTime();
 
 const togetherTimer = document.getElementById("togetherTimer");
 const countdownStatus = document.getElementById("countdownStatus");
@@ -58,6 +58,8 @@ const wishText = document.getElementById("wishText");
 const wishFormStatus = document.getElementById("wishFormStatus");
 const wishBubbleField = document.getElementById("wishBubbleField");
 const openWishFormModalBtn = document.getElementById("openWishFormModalBtn");
+const wishPageUrlLink = document.getElementById("wishPageUrl");
+const wishQrImage = document.getElementById("wishQrImage");
 const wishFormModal = document.getElementById("wishFormModal");
 const wishFormModalClose = document.getElementById("wishFormModalClose");
 const activityModal = document.getElementById("activityModal");
@@ -71,7 +73,7 @@ const activityModalDetail = document.getElementById("activityModalDetail");
 const bgMusic = document.getElementById("bgMusic");
 const musicToggleBtn = document.getElementById("musicToggleBtn");
 const musicStatus = document.getElementById("musicStatus");
-const defaultMusicTracks = ["audio/romantic.mp4"];
+const defaultMusicTracks = ["audio/romantic.mp4", "audio/romantic_1.mp3"];
 const wishesStorageKey = "wedding_wishes_v1";
 let activeItineraryItem = null;
 let wishesData = [];
@@ -627,6 +629,41 @@ function setupWishFormModal() {
             closeWishFormModal();
         }
     });
+}
+
+function setupWishShareLink() {
+    if (!wishPageUrlLink && !wishQrImage) return;
+
+    const wishPageUrl = resolveWishPageUrl();
+
+    if (wishPageUrlLink) {
+        wishPageUrlLink.href = wishPageUrl;
+        wishPageUrlLink.textContent = wishPageUrl;
+    }
+
+    if (wishQrImage) {
+        const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=340x340&data=${encodeURIComponent(wishPageUrl)}`;
+        wishQrImage.src = qrUrl;
+    }
+}
+
+function resolveWishPageUrl() {
+    const { protocol, host, origin, pathname } = window.location;
+
+    // Opening index.html directly from disk (file://.../index.html).
+    if (protocol === "file:") {
+        return new URL("./wishes.html", window.location.href).href;
+    }
+
+    // GitHub Pages project site uses /<repo>/... paths.
+    if (host.endsWith(".github.io")) {
+        const firstPathPart = pathname.split("/").filter(Boolean)[0];
+        const repoPrefix = firstPathPart ? `/${firstPathPart}` : "";
+        return `${origin}${repoPrefix}/wishes.html`;
+    }
+
+    // Localhost and regular hosts resolve from site root.
+    return `${origin}/wishes.html`;
 }
 
 function parseEventGallery(item) {
@@ -1378,6 +1415,7 @@ setupRevealAnimations();
 setupMemoryLightbox();
 setupActivityModal();
 setupWishFormModal();
+setupWishShareLink();
 setupWeddingItinerary();
 setupWeddingWishes();
 setupBackgroundMusic();
