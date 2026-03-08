@@ -11,6 +11,14 @@ const cdSeconds = document.getElementById("cdSeconds");
 
 const tabButtons = Array.from(document.querySelectorAll(".tab-btn"));
 const tabPanels = Array.from(document.querySelectorAll(".tab-panel"));
+// Single source of truth for tab visibility.
+// Set any tab to false to hide it.
+const tabVisibilityConfig = Object.freeze({
+    home: true,
+    countdown: true,
+    memories: true,
+    letter: false
+});
 
 const unlockBtn = document.getElementById("unlockBtn");
 const secretInput = document.getElementById("secretInput");
@@ -87,6 +95,44 @@ function formatDuration(ms) {
     return { days, hours, minutes, seconds };
 }
 
+function isTabVisible(tabId) {
+    return tabVisibilityConfig[tabId] !== false;
+}
+
+function applyTabVisibilityConfig() {
+    tabButtons.forEach((button) => {
+        const tabId = button.dataset.tab;
+        const visible = isTabVisible(tabId);
+        button.hidden = !visible;
+        if (!visible) {
+            button.classList.remove("active");
+            button.setAttribute("aria-selected", "false");
+        }
+    });
+
+    tabPanels.forEach((panel) => {
+        const visible = isTabVisible(panel.id);
+        panel.hidden = !visible;
+        if (!visible) {
+            panel.classList.remove("active");
+        }
+    });
+}
+
+function getVisibleTabIds() {
+    return tabButtons
+        .filter((button) => !button.hidden)
+        .map((button) => button.dataset.tab)
+        .filter((tabId) => tabPanels.some((panel) => panel.id === tabId && !panel.hidden));
+}
+
+function resolveAvailableTab(tabId) {
+    const visibleTabIds = getVisibleTabIds();
+    if (!visibleTabIds.length) return null;
+    if (tabId && visibleTabIds.includes(tabId)) return tabId;
+    return visibleTabIds[0];
+}
+
 function updateTimers() {
     const now = Date.now();
 
@@ -111,14 +157,17 @@ function updateTimers() {
 }
 
 function activateTab(tabId) {
+    const resolvedTabId = resolveAvailableTab(tabId);
+    if (!resolvedTabId) return;
+
     tabButtons.forEach((button) => {
-        const isActive = button.dataset.tab === tabId;
+        const isActive = !button.hidden && button.dataset.tab === resolvedTabId;
         button.classList.toggle("active", isActive);
         button.setAttribute("aria-selected", isActive ? "true" : "false");
     });
 
     tabPanels.forEach((panel) => {
-        const isActive = panel.id === tabId;
+        const isActive = !panel.hidden && panel.id === resolvedTabId;
         panel.classList.toggle("active", isActive);
         if (isActive) {
             updatePanelViewportHeight(panel);
@@ -129,7 +178,10 @@ function activateTab(tabId) {
 
 function bindTabs() {
     tabButtons.forEach((button) => {
-        button.addEventListener("click", () => activateTab(button.dataset.tab));
+        button.addEventListener("click", () => {
+            if (button.hidden) return;
+            activateTab(button.dataset.tab);
+        });
     });
 }
 
@@ -181,6 +233,7 @@ function queuePanelSectionState(panel) {
 
 function setupTabSectionScrollExperience() {
     tabPanels.forEach((panel) => {
+        if (panel.hidden) return;
         const sections = getTabSections(panel);
         if (sections.length < 2) return;
 
@@ -196,10 +249,20 @@ function setupTabSectionScrollExperience() {
 
     window.addEventListener("resize", () => {
         tabPanels.forEach((panel) => {
+            if (panel.hidden) return;
             updatePanelViewportHeight(panel);
             queuePanelSectionState(panel);
         });
     });
+}
+
+function activateInitialTab(preferredTabId) {
+    const initialTabId = resolveAvailableTab(preferredTabId);
+    if (!initialTabId) {
+        console.warn("No visible tabs are enabled. Set at least one tab to visible.");
+        return;
+    }
+    activateTab(initialTabId);
 }
 
 function unlockLoveLetter() {
@@ -1307,9 +1370,10 @@ secretInput.addEventListener("keydown", (event) => {
     }
 });
 
+applyTabVisibilityConfig();
 bindTabs();
 setupTabSectionScrollExperience();
-activateTab("home");
+activateInitialTab("home");
 setupRevealAnimations();
 setupMemoryLightbox();
 setupActivityModal();
