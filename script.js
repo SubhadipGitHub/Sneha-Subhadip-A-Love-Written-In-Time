@@ -642,8 +642,18 @@ function setupWishShareLink() {
     }
 
     if (wishQrImage) {
-        const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=340x340&data=${encodeURIComponent(wishPageUrl)}`;
-        wishQrImage.src = qrUrl;
+        const qrPrimaryUrl = buildQrImageUrl(wishPageUrl, "qrserver");
+        const qrFallbackUrl = buildQrImageUrl(wishPageUrl, "quickchart");
+        wishQrImage.referrerPolicy = "no-referrer";
+        wishQrImage.loading = "lazy";
+        wishQrImage.src = qrPrimaryUrl;
+        wishQrImage.addEventListener(
+            "error",
+            () => {
+                wishQrImage.src = qrFallbackUrl;
+            },
+            { once: true }
+        );
     }
 }
 
@@ -664,6 +674,13 @@ function resolveWishPageUrl() {
 
     // Localhost and regular hosts resolve from site root.
     return `${origin}/wishes.html`;
+}
+
+function buildQrImageUrl(targetUrl, provider) {
+    if (provider === "quickchart") {
+        return `https://quickchart.io/qr?size=340&text=${encodeURIComponent(targetUrl)}`;
+    }
+    return `https://api.qrserver.com/v1/create-qr-code/?size=340x340&data=${encodeURIComponent(targetUrl)}`;
 }
 
 function parseEventGallery(item) {
