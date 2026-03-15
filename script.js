@@ -17,6 +17,7 @@ const tabVisibilityConfig = Object.freeze({
     home: true,
     countdown: true,
     memories: true,
+    partners: true,
     letter: false
 });
 
@@ -39,6 +40,15 @@ const itineraryPage = document.getElementById("itineraryPage");
 const itineraryTag = document.getElementById("itineraryTag");
 const itineraryTitle = document.getElementById("itineraryTitle");
 const itineraryGuestsLink = document.getElementById("itineraryGuestsLink");
+const partnerCards = Array.from(document.querySelectorAll(".partner-card"));
+const partnerModal = document.getElementById("partnerModal");
+const partnerModalClose = document.getElementById("partnerModalClose");
+const partnerModalTag = document.getElementById("partnerModalTag");
+const partnerModalLogo = document.getElementById("partnerModalLogo");
+const partnerModalTitle = document.getElementById("partnerModalTitle");
+const partnerModalDesc = document.getElementById("partnerModalDesc");
+const partnerModalDetails = document.getElementById("partnerModalDetails");
+const partnerModalActions = document.getElementById("partnerModalActions");
 const itineraryCover = document.getElementById("itineraryCover");
 const itineraryDate = document.getElementById("itineraryDate");
 const itineraryTime = document.getElementById("itineraryTime");
@@ -437,6 +447,9 @@ function setupMemoryLightbox() {
         if (event.key === "Escape" && activityModal?.classList.contains("open")) {
             closeActivityModal();
         }
+        if (event.key === "Escape" && partnerModal?.classList.contains("open")) {
+            closePartnerModal();
+        }
         if (event.key === "Escape" && wishFormModal?.classList.contains("open")) {
             closeWishFormModal();
         }
@@ -617,6 +630,76 @@ function closeWishFormModal() {
     wishFormModal.classList.remove("open");
     wishFormModal.setAttribute("aria-hidden", "true");
     syncModalBodyLock();
+}
+
+function openPartnerModalFromCard(card) {
+    if (!partnerModal || !partnerModalLogo || !partnerModalTitle || !partnerModalDesc || !partnerModalDetails || !partnerModalActions || !partnerModalTag) {
+        return;
+    }
+
+    const logo = card.dataset.partnerLogo || "";
+    const title = card.querySelector("h3")?.textContent?.trim() || "Partner";
+    const desc = card.querySelector(".partner-desc")?.textContent?.trim() || "";
+    const chips = Array.from(card.querySelectorAll(".partner-chip"))
+        .map((chip) => chip.textContent?.trim())
+        .filter(Boolean);
+    const details = card.dataset.partnerDetails || "";
+    const actionLinks = Array.from(card.querySelectorAll(".partner-actions a")).map((link) => link.cloneNode(true));
+
+    partnerModalLogo.textContent = logo || title.slice(0, 1).toUpperCase();
+    partnerModalTitle.textContent = title;
+    partnerModalDesc.textContent = desc;
+    partnerModalDetails.textContent = details;
+    partnerModalTag.textContent = chips[0] || "Partner";
+
+    partnerModalActions.innerHTML = "";
+    actionLinks.forEach((a) => {
+        a.addEventListener("click", (event) => event.stopPropagation());
+        partnerModalActions.appendChild(a);
+    });
+
+    partnerModal.classList.add("open");
+    partnerModal.setAttribute("aria-hidden", "false");
+    syncModalBodyLock();
+}
+
+function closePartnerModal() {
+    if (!partnerModal) return;
+    partnerModal.classList.remove("open");
+    partnerModal.setAttribute("aria-hidden", "true");
+    syncModalBodyLock();
+}
+
+function setupPartnerModal() {
+    if (!partnerCards.length || !partnerModal || !partnerModalClose) return;
+
+    partnerCards.forEach((card) => {
+        card.setAttribute("role", "button");
+        card.setAttribute("tabindex", "0");
+        const title = card.querySelector("h3")?.textContent?.trim() || "Partner";
+        card.setAttribute("aria-label", `Open ${title} details`);
+
+        card.addEventListener("click", (event) => {
+            if (event.target.closest("a")) return;
+            openPartnerModalFromCard(card);
+        });
+
+        card.addEventListener("keydown", (event) => {
+            if (event.key === "Enter" || event.key === " ") {
+                event.preventDefault();
+                openPartnerModalFromCard(card);
+            }
+        });
+
+        card.querySelectorAll("a").forEach((a) => a.addEventListener("click", (event) => event.stopPropagation()));
+    });
+
+    partnerModalClose.addEventListener("click", closePartnerModal);
+    partnerModal.addEventListener("click", (event) => {
+        if (event.target === partnerModal) {
+            closePartnerModal();
+        }
+    });
 }
 
 function setupWishFormModal() {
@@ -1431,6 +1514,7 @@ activateInitialTab("home");
 setupRevealAnimations();
 setupMemoryLightbox();
 setupActivityModal();
+setupPartnerModal();
 setupWishFormModal();
 setupWishShareLink();
 setupWeddingItinerary();

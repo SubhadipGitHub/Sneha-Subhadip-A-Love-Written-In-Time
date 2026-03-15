@@ -37,8 +37,35 @@
                 radial-gradient(circle at 18% 20%, rgba(255, 157, 194, 0.28), transparent 42%),
                 radial-gradient(circle at 78% 12%, rgba(170, 201, 255, 0.18), transparent 39%),
                 linear-gradient(155deg, var(--bg-deep), var(--bg-mid) 42%, var(--bg-soft));
+            background-position: 0% 0%, 100% 0%, 50% 50%;
+            animation: wishBgDrift 16s ease-in-out infinite alternate;
             padding: 1rem;
             overflow-x: hidden;
+        }
+
+        body::before,
+        body::after {
+            content: "";
+            position: fixed;
+            inset: -18%;
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        body::before {
+            background:
+                radial-gradient(circle at 18% 30%, rgba(255, 163, 206, 0.25), transparent 52%),
+                radial-gradient(circle at 76% 24%, rgba(170, 208, 255, 0.18), transparent 46%),
+                radial-gradient(circle at 70% 82%, rgba(255, 190, 206, 0.2), transparent 52%);
+            filter: blur(22px) saturate(135%);
+            animation: wishOrbs 12.5s ease-in-out infinite alternate;
+        }
+
+        body::after {
+            background-image: radial-gradient(rgba(255, 255, 255, 0.05) 1px, transparent 1px);
+            background-size: 3px 3px;
+            mix-blend-mode: soft-light;
+            opacity: 0.45;
         }
 
         .wish-page-card {
@@ -52,6 +79,7 @@
             padding: 1.15rem;
             overflow: hidden;
             animation: cardReveal 700ms ease both;
+            z-index: 1;
         }
 
         .wish-page-card::before {
@@ -137,6 +165,26 @@
         .wish-page-subtitle {
             margin: 0 0 1rem;
             color: var(--text-muted);
+        }
+
+        @keyframes wishBgDrift {
+            0% {
+                background-position: 0% 0%, 100% 0%, 50% 50%;
+            }
+            100% {
+                background-position: 12% 10%, 88% 14%, 56% 44%;
+            }
+        }
+
+        @keyframes wishOrbs {
+            0% {
+                transform: translate3d(-1.5%, -1.5%, 0) scale(1);
+                opacity: 0.9;
+            }
+            100% {
+                transform: translate3d(1.6%, 1.2%, 0) scale(1.04);
+                opacity: 1;
+            }
         }
 
         form {
@@ -270,6 +318,8 @@
         }
 
         @media (prefers-reduced-motion: reduce) {
+            body,
+            body::before,
             .wish-page-card,
             .wish-page-card::before,
             .wish-page-card::after,
