@@ -17,7 +17,7 @@ const tabVisibilityConfig = Object.freeze({
     home: true,
     countdown: true,
     memories: true,
-    partners: true,
+    partners: false,
     letter: false
 });
 
@@ -184,6 +184,9 @@ function activateTab(tabId) {
         if (isActive) {
             updatePanelViewportHeight(panel);
             updatePanelSectionState(panel);
+            if (panel.id === "countdown") {
+                requestAnimationFrame(renderWishBubbles);
+            }
         }
     });
 }
@@ -1085,6 +1088,23 @@ function saveWishesToStorage() {
     }
 }
 
+function syncWishesFromStorage() {
+    const latest = loadWishesFromStorage();
+    if (!Array.isArray(latest)) return false;
+
+    // Fast-path: compare top IDs/length to detect changes without deep diffing.
+    const latestTop = latest[0]?.id || "";
+    const currentTop = wishesData[0]?.id || "";
+    const changed = latest.length !== wishesData.length || latestTop !== currentTop;
+
+    if (changed) {
+        wishesData = latest;
+        rebuildWishCycleDeck();
+    }
+
+    return changed;
+}
+
 function shuffleArray(items) {
     const copy = [...items];
     for (let i = copy.length - 1; i > 0; i -= 1) {
@@ -1364,9 +1384,12 @@ function burstWishBubble(bubble) {
 
 function renderWishBubbles() {
     if (!wishBubbleField) return;
-    wishBubbleField.innerHTML = "";
 
-    const visibleWishes = pickCycledWishes(10);
+    // Keep static decor (like the centered heart) while re-rendering dynamic bubbles.
+    wishBubbleField.querySelectorAll(".wish-bubble, .wish-bubble-empty, .wish-pop-piece").forEach((node) => node.remove());
+
+    const maxVisible = 6;
+    const visibleWishes = pickCycledWishes(maxVisible);
     if (!visibleWishes.length) {
         const empty = document.createElement("p");
         empty.className = "wish-bubble-empty";
@@ -1385,32 +1408,45 @@ function renderWishBubbles() {
         bubble.className = "wish-bubble";
         bubble.setAttribute("aria-label", `Wish by ${entry.name}`);
 
-        const head = document.createElement("div");
-        head.className = "wish-bubble-head";
+        // Bootstrap-like "card mb-3" layout: media left, body right.
+        const row = document.createElement("div");
+        row.className = "wish-bubble-row";
+
+        const mediaCol = document.createElement("div");
+        mediaCol.className = "wish-bubble-media";
 
         const avatar = document.createElement("img");
-        avatar.className = "wish-bubble-avatar";
+        avatar.className = "wish-bubble-img";
         avatar.src = buildGravatarUrl(entry.name);
         avatar.alt = `${entry.name} avatar`;
+        avatar.loading = "lazy";
 
-        const name = document.createElement("p");
-        name.className = "wish-bubble-name";
-        name.textContent = `- ${entry.name}`;
+        mediaCol.appendChild(avatar);
 
-        head.appendChild(avatar);
-        head.appendChild(name);
+        const bodyCol = document.createElement("div");
+        bodyCol.className = "wish-bubble-body";
 
-        const wishTitle = document.createElement("p");
-        wishTitle.className = "wish-bubble-wish";
-        wishTitle.textContent = entry.text;
+        const title = document.createElement("h5");
+        title.className = "wish-bubble-title";
+        title.textContent = entry.name || "Guest";
 
-        bubble.appendChild(head);
-        bubble.appendChild(wishTitle);
+        const text = document.createElement("p");
+        text.className = "wish-bubble-text";
+        text.textContent = entry.text;
 
-        const timestamp = document.createElement("p");
-        timestamp.className = "wish-bubble-time";
-        timestamp.textContent = entry.createdAtIst || formatIstTimestamp(entry.createdAt || Date.now());
-        bubble.appendChild(timestamp);
+        const meta = document.createElement("p");
+        meta.className = "wish-bubble-meta";
+        const small = document.createElement("small");
+        small.textContent = entry.createdAtIst || formatIstTimestamp(entry.createdAt || Date.now());
+        meta.appendChild(small);
+
+        bodyCol.appendChild(title);
+        bodyCol.appendChild(text);
+        bodyCol.appendChild(meta);
+
+        row.appendChild(mediaCol);
+        row.appendChild(bodyCol);
+        bubble.appendChild(row);
         wishBubbleField.appendChild(bubble);
 
         const bubbleWidth = bubble.offsetWidth || 188;
@@ -1466,6 +1502,7 @@ function toggleWishesPanel() {
     openWishesBtn.setAttribute("aria-expanded", isOpen ? "true" : "false");
 
     if (isOpen) {
+        syncWishesFromStorage();
         requestAnimationFrame(renderWishBubbles);
         setWishStatus(
             wishesData.length
@@ -1478,24 +1515,46 @@ function toggleWishesPanel() {
 }
 
 function setupWeddingWishes() {
-    if (!openWishesBtn || !weddingWishesPanel || !wishesForm || !wishBubbleField) return;
+    if (!weddingWishesPanel || !wishBubbleField) return;
 
     wishesData = loadWishesFromStorage();
     rebuildWishCycleDeck();
     setWishStatus(
         wishesData.length
-            ? `${wishesData.length} wish${wishesData.length === 1 ? "" : "es"} saved. Open Wishes Garden to view.`
+            ? `Showing ${Math.min(6, wishesData.length)} of ${wishesData.length} wishes in dreamy cycle mode.`
             : "Be the first to leave a blessing."
     );
 
-    openWishesBtn.addEventListener("click", toggleWishesPanel);
-    wishesForm.addEventListener("submit", handleWishSubmit);
+    // If the index page includes a toggle button, wire it up; otherwise keep the garden visible.
+    if (openWishesBtn) {
+        openWishesBtn.addEventListener("click", toggleWishesPanel);
+    }
+
+    // Optional in-page form support (if present).
+    if (wishesForm) {
+        wishesForm.addEventListener("submit", handleWishSubmit);
+    }
+
+    // Render immediately (index shows the garden by default).
+    requestAnimationFrame(renderWishBubbles);
+
+    // If another tab (like wishes.html) writes to localStorage, keep the garden in sync.
+    window.addEventListener("storage", (event) => {
+        if (event.key !== wishesStorageKey) return;
+        if (syncWishesFromStorage()) {
+            renderWishBubbles();
+            setWishStatus(
+                wishesData.length
+                    ? `Showing ${Math.min(6, wishesData.length)} of ${wishesData.length} wishes in dreamy cycle mode.`
+                    : "Be the first to leave a blessing."
+            );
+        }
+    });
 
     if (!wishesRefreshTimer) {
         wishesRefreshTimer = setInterval(() => {
-            if (weddingWishesPanel.classList.contains("open")) {
-                renderWishBubbles();
-            }
+            syncWishesFromStorage();
+            renderWishBubbles();
         }, 9000);
     }
 }

@@ -363,10 +363,29 @@ main {
     object-fit: cover;
     transform: scale(1.04);
     transition: transform 0.75s ease;
+    background-color: white;
 }
 
 .timer-cover:hover img {
     transform: scale(1.09);
+}
+
+.timer-cover.timer-cover--contain {
+    /* Use a theme-matching backdrop so any letterboxing (from object-fit: contain) feels intentional. */
+    background:
+        radial-gradient(circle at 18% 22%, rgba(255, 142, 168, 0.32), transparent 55%),
+        radial-gradient(circle at 78% 18%, rgba(255, 245, 247, 0.14), transparent 52%),
+        linear-gradient(140deg, var(--bg-2), var(--bg-1) 58%, var(--bg-3));
+}
+
+.timer-cover.timer-cover--contain img {
+    object-fit: contain;
+    transform: none;
+    filter: saturate(1.06) contrast(1.03);
+}
+
+.timer-cover.timer-cover--contain:hover img {
+    transform: none;
 }
 
 .timer-cover.timer-cover--gif {
@@ -641,6 +660,30 @@ p {
         linear-gradient(150deg, rgba(255, 245, 247, 0.14), rgba(13, 4, 10, 0.55));
 }
 
+.wish-garden-centerpiece {
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    transform: translate(-50%, -50%);
+    width: min(260px, 78%);
+    padding: 0.8rem;
+    border-radius: 1.1rem;
+    background: rgba(255, 255, 255, 0.96);
+    border: 1px solid rgba(255, 255, 255, 0.82);
+    box-shadow:
+        0 18px 34px rgba(0, 0, 0, 0.28),
+        0 0 0 6px rgba(255, 255, 255, 0.08);
+    z-index: 1;
+    pointer-events: none;
+}
+
+.wish-garden-centerpiece img {
+    width: 100%;
+    height: auto;
+    display: block;
+    border-radius: 0.85rem;
+}
+
 .wish-bubble-empty {
     margin: 0;
     min-height: 520px;
@@ -649,21 +692,28 @@ p {
     color: #ffe3eb;
     padding: 1rem;
     text-align: center;
+    position: relative;
+    z-index: 2;
 }
 
 .wish-bubble {
     position: absolute;
-    width: clamp(150px, 19vw, 220px);
-    min-height: 96px;
-    border-radius: 1.25rem;
-    padding: 0.56rem 0.64rem 0.58rem;
-    border: 1px solid rgba(255, 255, 255, 0.4);
-    background: linear-gradient(145deg, rgba(255, 255, 255, 0.22), rgba(255, 201, 219, 0.14));
-    box-shadow: 0 14px 28px rgba(0, 0, 0, 0.32);
-    backdrop-filter: blur(5px);
+    /* Bootstrap-like "card mb-3" feel (without importing Bootstrap). */
+    /* "4x smaller" interpreted as ~4x smaller area (about half the linear size) for readability. */
+    width: clamp(180px, 28vw, 270px);
+    min-height: 76px;
+    border-radius: 1rem;
+    padding: 0;
+    border: 1px solid rgba(255, 255, 255, 0.34);
+    background: rgba(255, 255, 255, 0.92);
+    box-shadow: 0 16px 32px rgba(0, 0, 0, 0.32);
+    color: #1f0f18;
     cursor: pointer;
     animation: wishBubbleFloat var(--float-duration, 9s) ease-in-out infinite;
     transition: transform 0.25s ease, box-shadow 0.25s ease, opacity 0.25s ease;
+    z-index: 2;
+    overflow: hidden;
+    text-align: left;
 }
 
 .wish-bubble:hover,
@@ -671,6 +721,74 @@ p {
     transform: translateY(-4px) scale(1.02);
     box-shadow: 0 20px 34px rgba(0, 0, 0, 0.42);
     outline: none;
+}
+
+.wish-bubble-row {
+    display: flex;
+    align-items: stretch;
+}
+
+.wish-bubble-media {
+    flex: 0 0 34%;
+    max-width: 95px;
+}
+
+.wish-bubble-img {
+    width: 100%;
+    height: 100%;
+    min-height: 76px;
+    display: block;
+    object-fit: cover;
+}
+
+.wish-bubble-body {
+    flex: 1 1 auto;
+    padding: 0.55rem 0.6rem 0.5rem;
+}
+
+.wish-bubble-title {
+    margin: 0 0 0.35rem;
+    font-family: "Cinzel", serif;
+    font-size: 0.9rem;
+    color: #1f0f18;
+}
+
+.wish-bubble-text {
+    margin: 0;
+    font-size: 0.78rem;
+    line-height: 1.25;
+    color: rgba(31, 15, 24, 0.86);
+}
+
+.wish-bubble-meta {
+    margin: 0.55rem 0 0;
+    color: rgba(31, 15, 24, 0.58);
+    font-size: 0.66rem;
+    letter-spacing: 0.01em;
+}
+
+.wish-bubble-meta small {
+    font-size: inherit;
+}
+
+@media (max-width: 520px) {
+    .wish-bubble {
+        width: min(82vw, 270px);
+    }
+
+    .wish-bubble-row {
+        flex-direction: column;
+    }
+
+    .wish-bubble-media {
+        max-width: none;
+        flex: 0 0 auto;
+    }
+
+    .wish-bubble-img {
+        height: 90px;
+        min-height: 90px;
+    }
 }
 
 .wish-bubble-head {
@@ -727,6 +845,7 @@ p {
     background: rgba(255, 220, 234, 0.95);
     pointer-events: none;
     animation: wishPopShard 520ms ease-out forwards;
+    z-index: 3;
 }
 
 .itinerary-shell {
