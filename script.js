@@ -378,24 +378,32 @@ function getYouTubeEmbedUrl(url) {
     if (!url) return null;
 
     try {
-        const parsed = new URL(url);
+        const parsed = new URL(url, window.location.href);
         const host = parsed.hostname.replace(/^www\./, "");
         let videoId = "";
+        const pathSegments = parsed.pathname.split("/").filter(Boolean);
 
         if (host === "youtu.be") {
             videoId = parsed.pathname.slice(1);
-        } else if (host === "youtube.com" || host === "m.youtube.com") {
-            if (parsed.pathname === "/watch") {
+        } else if (host === "youtube.com" || host === "m.youtube.com" || host === "youtube-nocookie.com") {
+            if (pathSegments[0] === "watch") {
                 videoId = parsed.searchParams.get("v") || "";
-            } else if (parsed.pathname.startsWith("/shorts/")) {
-                videoId = parsed.pathname.split("/")[2] || "";
-            } else if (parsed.pathname.startsWith("/embed/")) {
-                videoId = parsed.pathname.split("/")[2] || "";
+            } else if (pathSegments[0] === "shorts" || pathSegments[0] === "embed") {
+                videoId = pathSegments[1] || "";
             }
         }
 
         if (!videoId) return null;
-        return `https://www.youtube.com/embed/${videoId}?autoplay=1&rel=0`;
+
+        const params = new URLSearchParams({ rel: "0", playsinline: "1" });
+        const start = parsed.searchParams.get("start") || parsed.searchParams.get("t");
+        if (start) params.set("start", start);
+
+        if (window.location?.protocol === "http:" || window.location?.protocol === "https:") {
+            params.set("origin", window.location.origin);
+        }
+
+        return `https://www.youtube.com/embed/${videoId}?${params.toString()}`;
     } catch (error) {
         return null;
     }
