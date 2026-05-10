@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Sneha & Subhadip | A Love Written In Time</title>
+    <title>Subhadip & Sneha | A Love Written In Time</title>
     <link rel="icon" type="image/x-icon" href="images/favicon.ico">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -18,7 +18,7 @@
 
     <header class="hero reveal">
         <p class="hero-kicker">A Love written in time</p>
-        <h1>SNEHA <span>&</span> SUBHADIP</h1>
+        <h1>SUBHADIP <span>&</span> SNEHA</h1>
         <p class="hero-subtitle">From March 1, 2025 to forever.</p>
     </header>
 
@@ -160,13 +160,14 @@
             <div class="glass-card itinerary-shell reveal">
                 <div class="section-head centered">
                     <h2>Wedding Itinerary</h2>
-                    <p>Tap any event card to open its full details page below.</p>
+                    <p>Pick an event tab to preview the day, or expand it for the full-screen details.</p>
                     <p class="help-text">Tip: Guest badge opens active guest list, and RSVP is available beside it.</p>
                 </div>
-                <div class="itinerary-grid">
+                <div class="itinerary-grid" role="tablist" aria-label="Wedding event tabs">
                     <button
                         type="button"
                         class="itinerary-item reveal"
+                        role="tab"
                         data-event="Engagement Ceremony"
                         data-date="June 6, 2026"
                         data-time="5:00 PM onwards"
@@ -181,7 +182,7 @@
                         data-total="60"
                         data-attending="40"
                         data-cover="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSVyw9ICEnshHg3BfDnrOBaCQxoQeCw1IxdSQ&s"
-                        data-program="performances|5:00 PM - 5:30 PM|Guest Arrival and Welcome with drinks, Wish Wall, and photo upload station;performances|5:30 PM - 6:00 PM|Rooftop Golden Hour Photoshoot with host-led photo call groups;games|6:00 PM - 6:15 PM|Icebreaker: How Well Do You Know Them?;performances|6:15 PM - 6:30 PM|Love Story Slideshow and Next Chapter Begins Today moment;performances|6:30 PM - 6:45 PM|Couple Entry with lights and favorite song;performances|6:45 PM - 7:00 PM|Ring Exchange Ceremony with parents blessing and confetti;performances|7:00 PM - 7:15 PM|Cake Cutting with family-first cake feed;games|7:15 PM - 7:40 PM|Family Games: Bride vs Groom Quiz, Shoe Game, Tug of Love;performances|7:40 PM - 8:00 PM|Friends and Cousins Performances;food|8:00 PM - 8:30 PM|Dinner Opens with chaat and live mocktail counters;performances|8:30 PM - 9:00 PM|Couple Dance performance and sparkler ending;performances|9:00 PM - 10:30 PM|DJ and Open Dance Floor with dedications and dance-offs"
+                        data-program="performances|5:30 PM - 6:30 PM|Couple and close family arrive at event;performances|6:00 PM - 7:00 PM|Rooftop Golden Hour Photoshoot;performances|7:00 PM - 7:30 PM|Guest Arrival and Welcome with drinks, Wish Wall, and photo upload station;performances|7:30 PM - 8:00 PM|Couple Entry with lights, smoke gun, and favorite song;performances|8:00 PM - 9:00 PM|Ring Exchange Ceremony with parents blessing and confetti, Cake Cutting with family, Love Story Slideshow, small performance by couple (duet song);games|TBD|Family Games;food|7:00 PM - 8:30 PM|Dinner Opens with chaat and live mocktail counters;food|8:30 PM - 10:30 PM|Dinner starts with main course and dessert;performances|9:00 PM - 10:30 PM|Play music in hotel speakers, Open Dance Floor"
                     >
                         <span class="itinerary-day">June 6</span>
                         <h3>Engagement</h3>
@@ -190,6 +191,7 @@
                     <button
                         type="button"
                         class="itinerary-item reveal"
+                        role="tab"
                         data-event="Sangeet Night"
                         data-date="December 10, 2026"
                         data-time="7:00 PM onwards"
@@ -214,6 +216,7 @@
                     <button
                         type="button"
                         class="itinerary-item reveal"
+                        role="tab"
                         data-event="Haldi Ceremony"
                         data-date="December 11, 2026"
                         data-time="10:30 AM onwards"
@@ -227,7 +230,7 @@
                         data-guests="120 Guests"
                         data-total="120"
                         data-attending="92"
-                        data-cover="https://i.ytimg.com/vi/-yt7JE7I5M0/hq720.jpg?sqp=-oaymwEhCK4FEIIDSFryq4qpAxMIARUAAAAAGAElAADIQj0AgKJD&rs=AOn4CLB3J2SsGvy73wgNX0MZNuPesoPppQ"
+                        data-cover="https://static.vecteezy.com/system/resources/thumbnails/022/976/571/small/happy-couple-in-haldi-ceremony-free-vector.jpg"
                         data-program="performances|10:45 AM|Dhol Entry;games|11:15 AM|Floral Ring Toss;games|11:45 AM|Team Trivia;performances|12:00 PM|Cousins Performance;food|12:30 PM|Traditional Lunch Service"
                     >
                         <span class="itinerary-day">Dec 11</span>
@@ -238,6 +241,7 @@
                     <button
                         type="button"
                         class="itinerary-item reveal"
+                        role="tab"
                         data-event="Wedding Ceremony"
                         data-date="December 11, 2026"
                         data-time="7:45 PM muhurat"
@@ -262,6 +266,7 @@
                     <button
                         type="button"
                         class="itinerary-item reveal"
+                        role="tab"
                         data-event="Reception Evening"
                         data-date="December 13, 2026"
                         data-time="8:30 PM onwards"
@@ -284,7 +289,8 @@
                         <p>Grand celebration with everyone</p>
                     </button>
                 </div>
-                <article id="itineraryPage" class="itinerary-page reveal" aria-live="polite">
+                <article id="itineraryPage" class="itinerary-page reveal" role="tabpanel" aria-live="polite">
+                    <button id="itineraryFullscreenClose" class="lightbox-close itinerary-fullscreen-close" type="button" aria-label="Close full screen event details">&times;</button>
                     <p id="itineraryTag" class="itinerary-tag">Wedding Event</p>
                     <div class="itinerary-page-head">
                         <h3 id="itineraryTitle">Select an event</h3>
@@ -308,6 +314,12 @@
                         <p><span class="meta-icon" aria-hidden="true">L</span><strong>Location:</strong> <span id="itineraryLocation"></span> <a id="itineraryMapInlineLink" class="inline-map-link" href="#" target="_blank" rel="noopener noreferrer">(Open in Google Maps)</a></p>
                     </div>
                     <div class="itinerary-links">
+                        <button id="itineraryFullscreenBtn" class="primary-btn itinerary-link-btn expand-btn" type="button">
+                            <span class="btn-icon" aria-hidden="true">
+                                <svg viewBox="0 0 24 24" focusable="false"><path d="M5 5h6v2H8.4l4.1 4.1-1.4 1.4L7 8.4V11H5V5zm8 0h6v6h-2V8.4l-4.1 4.1-1.4-1.4L15.6 7H13V5zM7 15.6l4.1-4.1 1.4 1.4L8.4 17H11v2H5v-6h2v2.6zm10 0V13h2v6h-6v-2h2.6l-4.1-4.1 1.4-1.4L17 15.6z"/></svg>
+                            </span>
+                            Expand
+                        </button>
                         <a id="itineraryUploadLink" class="primary-btn itinerary-link-btn upload-btn" href="#" target="_blank" rel="noopener noreferrer">
                             <span class="btn-icon" aria-hidden="true">
                                 <svg viewBox="0 0 24 24" focusable="false"><path d="M11 4h2v8h3l-4 4-4-4h3V4zm-6 12h14v4H5v-4z"/></svg>
@@ -391,8 +403,8 @@
 
                 <div class="memory-left glass-card">
                     <div class="memory-timeline" aria-label="Romantic memory timeline">
-                        <article class="memory-card memory-era-card reveal" data-memory-order="1" data-person="guy" data-location="Subhadip's hometown" data-map-x="18" data-map-y="30" data-image="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTXjqXNvuBWTf9B77ZZy4PLWlkAzGQMoXgrow&amp;s">
-                            <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTXjqXNvuBWTf9B77ZZy4PLWlkAzGQMoXgrow&amp;s" alt="Subhadip timeline icon">
+                        <article class="memory-card memory-era-card reveal" data-memory-order="1" data-person="guy" data-location="Subhadip's hometown" data-map-x="18" data-map-y="30" data-image="https://img.freepik.com/premium-vector/cute-baby-boy-cartoon-vector-illustration_921448-1210.jpg">
+                            <img src="https://img.freepik.com/premium-vector/cute-baby-boy-cartoon-vector-illustration_921448-1210.jpg" alt="Subhadip timeline icon" class="avatar-guy">
                             <div class="memory-content">
                                 <p class="memory-date">July 9, 1993</p>
                                 <h3>Subhadip Arrives</h3>
@@ -400,15 +412,15 @@
                             </div>
                         </article>
                         <article class="memory-card memory-era-card reveal" data-memory-order="2" data-person="guy" data-location="Childhood days" data-map-x="24" data-map-y="38" data-image="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTXjqXNvuBWTf9B77ZZy4PLWlkAzGQMoXgrow&amp;s">
-                            <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTXjqXNvuBWTf9B77ZZy4PLWlkAzGQMoXgrow&amp;s" alt="Subhadip childhood placeholder">
+                            <img src="https://img.freepik.com/free-vector/boy-avatar-graphic-vector_53876-36035.jpg?semt=ais_hybrid&amp;w=600" alt="Subhadip childhood placeholder" class="avatar-guy">
                             <div class="memory-content">
                                 <p class="memory-date">Growing Years</p>
                                 <h3>His Quiet Becoming</h3>
                                 <p>School days, family love, and small victories shaped the calm strength Sneha would one day adore.</p>
                             </div>
                         </article>
-                        <article class="memory-card memory-era-card reveal" data-memory-order="3" data-person="girl" data-location="Sneha's hometown" data-map-x="75" data-map-y="32" data-image="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSDBBhjgAcJHAv7Iz3Z0lEvX_1f7YrOsHgaKA&amp;s">
-                            <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSDBBhjgAcJHAv7Iz3Z0lEvX_1f7YrOsHgaKA&amp;s" alt="Sneha timeline icon">
+                        <article class="memory-card memory-era-card reveal" data-memory-order="3" data-person="girl" data-location="Sneha's hometown" data-map-x="75" data-map-y="32" data-image="https://www.shutterstock.com/image-vector/cute-baby-girl-sit-pose-600nw-2536744001.jpg">
+                            <img src="https://www.shutterstock.com/image-vector/cute-baby-girl-sit-pose-600nw-2536744001.jpg" alt="Sneha timeline icon" class="avatar-girl">
                             <div class="memory-content">
                                 <p class="memory-date">June 20, 1997</p>
                                 <h3>Sneha Arrives</h3>
@@ -416,15 +428,21 @@
                             </div>
                         </article>
                         <article class="memory-card memory-era-card reveal" data-memory-order="4" data-person="girl" data-location="Growing dreams" data-map-x="69" data-map-y="42" data-image="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSDBBhjgAcJHAv7Iz3Z0lEvX_1f7YrOsHgaKA&amp;s">
-                            <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSDBBhjgAcJHAv7Iz3Z0lEvX_1f7YrOsHgaKA&amp;s" alt="Sneha growing years placeholder">
+                            <img src="https://img.freepik.com/free-vector/girl-avatar-graphic-vector_53876-36043.jpg?semt=ais_hybrid&amp;w=600" alt="Sneha growing years placeholder" class="avatar-girl">
                             <div class="memory-content">
                                 <p class="memory-date">Growing Years</p>
                                 <h3>Her Bright Becoming</h3>
                                 <p>Dreams, prayers, friendships, and family blessings quietly prepared her for a love that would feel destined.</p>
                             </div>
                         </article>
+                        <article class="memory-milestone-card reveal" data-milestone="destiny">
+                            <div class="milestone-marker">✨</div>
+                            <div class="milestone-content">
+                                <p class="milestone-label">Destined To Meet</p>
+                            </div>
+                        </article>
                         <article class="memory-card memory-era-card reveal" data-memory-order="5" data-person="couple" data-location="Bengaluru" data-map-x="48" data-map-y="50" data-image="https://img.freepik.com/free-vector/cute-couple-boy-girl-sitting-together-cartoon-vector-icon-illustration-people-holiday-icon-conc_138676-12418.jpg?semt=ais_hybrid&amp;w=740&amp;q=80">
-                            <img src="https://img.freepik.com/free-vector/cute-couple-boy-girl-sitting-together-cartoon-vector-icon-illustration-people-holiday-icon-conc_138676-12418.jpg?semt=ais_hybrid&amp;w=740&amp;q=80" alt="Couple destiny placeholder">
+                            <img src="images\couple-avatar.jpeg" alt="Couple destiny placeholder" class="avatar-couple">
                             <div class="memory-content">
                                 <p class="memory-date">Before March 2025</p>
                                 <h3>Two Roads Lean Closer</h3>
@@ -432,7 +450,7 @@
                             </div>
                         </article>
                         <article class="memory-card reveal" data-memory-order="6" data-person="couple" data-location="Kunafa date, Bengaluru" data-map-x="50" data-map-y="55" data-image="images/Kunafa.png">
-                            <img src="images/Kunafa.png" alt="Dessert date memory">
+                            <img src="images\couple-avatar.jpeg" alt="Dessert date memory">
                             <div class="memory-content">
                                 <p class="memory-date">March 1, 2025</p>
                                 <h3>Kunafa</h3>
@@ -440,7 +458,7 @@
                             </div>
                         </article>
                         <article class="memory-card reveal" data-memory-order="7" data-person="couple" data-location="ISKCON Temple, Bengaluru" data-map-x="42" data-map-y="44" data-image="images/iscon.png">
-                            <img src="images/iscon.png" alt="ISKCON temple memory">
+                            <img src="images\couple-avatar.jpeg" alt="ISKCON temple memory">
                             <div class="memory-content">
                                 <p class="memory-date">March 14, 2025</p>
                                 <h3>ISKCON Visit</h3>
@@ -448,7 +466,7 @@
                             </div>
                         </article>
                         <article class="memory-card reveal" data-memory-order="8" data-person="couple" data-location="Wayanad, Kerala" data-map-x="32" data-map-y="73" data-image="images/wayanad.jpg">
-                            <img src="images/wayanad.jpg" alt="Nature travel memory">
+                            <img src="images\couple-avatar.jpeg" alt="Nature travel memory">
                             <div class="memory-content">
                                 <p class="memory-date">April 20, 2025</p>
                                 <h3>Wayanad</h3>
@@ -456,7 +474,7 @@
                             </div>
                         </article>
                         <article class="memory-card memory-placeholder-card reveal" data-memory-order="9" data-person="couple" data-location="Everyday calls" data-map-x="55" data-map-y="50" data-image="https://img.freepik.com/free-vector/cute-couple-boy-girl-sitting-together-cartoon-vector-icon-illustration-people-holiday-icon-conc_138676-12418.jpg?semt=ais_hybrid&amp;w=740&amp;q=80">
-                            <img src="https://img.freepik.com/free-vector/cute-couple-boy-girl-sitting-together-cartoon-vector-icon-illustration-people-holiday-icon-conc_138676-12418.jpg?semt=ais_hybrid&amp;w=740&amp;q=80" alt="Everyday love placeholder">
+                            <img src="images\couple-avatar.jpeg" alt="Everyday love placeholder">
                             <div class="memory-content">
                                 <p class="memory-date">May 2025</p>
                                 <h3>Ordinary Magic</h3>
@@ -464,7 +482,7 @@
                             </div>
                         </article>
                         <article class="memory-card reveal" data-memory-order="10" data-person="couple" data-location="Dance floor" data-map-x="58" data-map-y="47" data-image="images/fance.png">
-                            <img src="images/fance.png" alt="Dance and music memory">
+                            <img src="images\couple-avatar.jpeg" alt="Dance and music memory">
                             <div class="memory-content">
                                 <p class="memory-date">May 12, 2025</p>
                                 <h3>First Dance</h3>
@@ -472,7 +490,7 @@
                             </div>
                         </article>
                         <article class="memory-card reveal" data-memory-order="11" data-person="couple" data-location="Bengaluru roads" data-map-x="63" data-map-y="58" data-image="images/bike.png">
-                            <img src="images/bike.png" alt="Bike ride memory">
+                            <img src="images\couple-avatar.jpeg" alt="Bike ride memory">
                             <div class="memory-content">
                                 <p class="memory-date">June 1, 2025</p>
                                 <h3>First Ride</h3>
@@ -480,15 +498,21 @@
                             </div>
                         </article>
                         <article class="memory-card reveal" data-memory-order="12" data-person="couple" data-location="Agara Lake, Bengaluru" data-map-x="60" data-map-y="62" data-image="images/agara.jpeg">
-                            <img src="images/agara.jpeg" alt="Lake sunset memory">
+                            <img src="images\couple-avatar.jpeg" alt="Lake sunset memory">
                             <div class="memory-content">
                                 <p class="memory-date">June 21, 2025</p>
                                 <h3>Agara Lake</h3>
                                 <p>Golden sunset, quiet water, and a memory that still glows.</p>
                             </div>
                         </article>
+                        <article class="memory-milestone-card reveal" data-milestone="commitment">
+                            <div class="milestone-marker">💍</div>
+                            <div class="milestone-content">
+                                <p class="milestone-label">Forever Committed</p>
+                            </div>
+                        </article>
                         <article class="memory-card memory-placeholder-card reveal" data-memory-order="13" data-person="couple" data-location="Family blessings" data-map-x="46" data-map-y="39" data-image="https://img.freepik.com/free-vector/cute-couple-boy-girl-sitting-together-cartoon-vector-icon-illustration-people-holiday-icon-conc_138676-12418.jpg?semt=ais_hybrid&amp;w=740&amp;q=80">
-                            <img src="https://img.freepik.com/free-vector/cute-couple-boy-girl-sitting-together-cartoon-vector-icon-illustration-people-holiday-icon-conc_138676-12418.jpg?semt=ais_hybrid&amp;w=740&amp;q=80" alt="Family blessings placeholder">
+                            <img src="images\couple-avatar-2.png" alt="Family blessings placeholder" class="avatar-couple">
                             <div class="memory-content">
                                 <p class="memory-date">Late 2025</p>
                                 <h3>Love Gets Roots</h3>
@@ -496,7 +520,7 @@
                             </div>
                         </article>
                         <article class="memory-card reveal" data-memory-order="14" data-person="couple" data-location="New Year celebration" data-map-x="52" data-map-y="35" data-image="images/new_year.png">
-                            <img src="images/new_year.png" alt="New Year celebration memory">
+                            <img src="images\couple-avatar-2.png" alt="New Year celebration memory">
                             <div class="memory-content">
                                 <p class="memory-date">December 31, 2025</p>
                                 <h3>New Year</h3>
@@ -504,7 +528,7 @@
                             </div>
                         </article>
                         <article class="memory-card reveal" data-memory-order="15" data-person="couple" data-location="Marriage decision" data-map-x="56" data-map-y="34" data-image="images/engaged.png">
-                            <img src="images/engaged.png" alt="Engagement ring decision memory">
+                            <img src="images\couple-avatar-2.png" alt="Engagement ring decision memory">
                             <div class="memory-content">
                                 <p class="memory-date">January 5, 2026</p>
                                 <h3>Marriage Decision</h3>
@@ -512,16 +536,16 @@
                             </div>
                         </article>
                         <article class="memory-card reveal" data-memory-order="16" data-person="couple" data-location="Ooty, Tamil Nadu" data-map-x="39" data-map-y="78" data-image="images/ooty.jpg">
-                            <img src="images/ooty.jpg" alt="Ooty trip hills memory">
+                            <img src="images\couple-avatar-2.png" alt="Ooty trip hills memory">
                             <div class="memory-content">
                                 <p class="memory-date">February 2, 2026</p>
                                 <h3>Ooty Trip</h3>
                                 <p>One last getaway before wedding plans turned into our next chapter.</p>
                             </div>
                         </article>
-                        <article class="memory-card reveal" data-memory-order="17" data-person="couple" data-location="Dance rehearsal" data-map-x="61" data-map-y="45" data-video="https://www.youtube.com/embed/arORSq2Ftg0" data-video-duration="25000" data-image="images/fance.png">
+                        <article class="memory-card reveal" data-memory-order="17" data-person="couple" data-location="Dance rehearsal" data-map-x="61" data-map-y="45" data-video="https://www.youtube.com/embed/arORSq2Ftg0" data-video-duration="10000" data-image="images/fance.png">
                             <div class="memory-media">
-                                <img src="images/fance.png" alt="Cover image for Dance video">
+                                <img src="images\couple-avatar-2.png" alt="Cover image for Dance video">
                                 <span class="video-badge" aria-hidden="true">Play</span>
                             </div>
                             <div class="memory-content">
@@ -531,15 +555,21 @@
                             </div>
                         </article>
                         <article class="memory-card reveal" data-memory-order="18" data-person="couple" data-location="Valentine date" data-map-x="65" data-map-y="52" data-image="images/valentine.jpg">
-                            <img src="images/valentine.jpg" alt="Romantic candlelight date memory">
+                            <img src="images\couple-avatar-2.png" alt="Romantic candlelight date memory">
                             <div class="memory-content">
                                 <p class="memory-date">February 14, 2026</p>
                                 <h3>Valentine Day</h3>
                                 <p>Candlelight, music, and heartbeats perfectly in sync.</p>
                             </div>
                         </article>
-                        <article class="memory-card memory-placeholder-card reveal" data-memory-order="19" data-person="couple" data-location="Wedding road ahead" data-map-x="72" data-map-y="62" data-image="https://img.freepik.com/free-vector/cute-couple-boy-girl-sitting-together-cartoon-vector-icon-illustration-people-holiday-icon-conc_138676-12418.jpg?semt=ais_hybrid&amp;w=740&amp;q=80">
-                            <img src="https://img.freepik.com/free-vector/cute-couple-boy-girl-sitting-together-cartoon-vector-icon-illustration-people-holiday-icon-conc_138676-12418.jpg?semt=ais_hybrid&amp;w=740&amp;q=80" alt="Wedding future placeholder">
+                        <article class="memory-milestone-card reveal" data-milestone="wedding">
+                            <div class="milestone-marker">💒</div>
+                            <div class="milestone-content">
+                                <p class="milestone-label">The Wedding Awaits</p>
+                            </div>
+                        </article>
+                        <article class="memory-card memory-placeholder-card reveal" data-memory-order="19" data-person="couple" data-location="Wedding road ahead" data-map-x="72" data-map-y="62" data-image="images\couple-avatar-3.png" data-duration="1000000">
+                            <img src="images\couple-avatar-3.png" alt="Wedding future placeholder" class="avatar-couple">
                             <div class="memory-content">
                                 <p class="memory-date">Forever Ahead</p>
                                 <h3>The Next Chapter</h3>

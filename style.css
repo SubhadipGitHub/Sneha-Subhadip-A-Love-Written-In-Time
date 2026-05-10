@@ -124,6 +124,22 @@ main {
 .hero {
     padding: 2.2rem 1rem 1rem;
     text-align: center;
+    transition: opacity 0.45s ease, transform 0.45s ease, max-height 0.45s ease, padding 0.45s ease, margin 0.45s ease;
+    max-height: 220px;
+    overflow: hidden;
+}
+
+body.hero-auto-hidden .hero {
+    opacity: 0;
+    transform: translateY(-0.75rem);
+    max-height: 0;
+    padding-block: 0;
+    margin: 0;
+    pointer-events: none;
+}
+
+body.hero-auto-hidden .top-nav {
+    margin-top: 0.65rem;
 }
 
 .hero-kicker {
@@ -227,6 +243,18 @@ body.memory-playback-active .top-nav {
 
 body.memory-playback-active .hero {
     display: none;
+}
+
+body.memory-playback-active .tab-shell {
+    display: flex;
+    align-items: center;
+    min-height: 100svh;
+    margin-bottom: 0;
+    padding-block: clamp(0.5rem, 1.5svh, 1.5rem);
+}
+
+body.memory-playback-active #memories.tab-panel.active {
+    width: 100%;
 }
 
 .tab-btn {
@@ -879,59 +907,77 @@ p {
 
 .itinerary-grid {
     display: grid;
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-    gap: 0.9rem;
+    grid-template-columns: repeat(5, minmax(0, 1fr));
+    gap: 0.45rem;
+    margin-bottom: 1rem;
 }
 
 .itinerary-item {
     position: relative;
     border: 1px solid rgba(255, 255, 255, 0.25);
-    background: linear-gradient(145deg, rgba(255, 255, 255, 0.12), rgba(13, 4, 10, 0.35));
-    border-radius: 1rem;
-    text-align: left;
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 0.72rem;
+    text-align: center;
     color: var(--text);
-    padding: 0.95rem 1rem 1rem;
-    padding-right: 6.3rem;
+    padding: 0.82rem 0.75rem 0.88rem;
     cursor: pointer;
-    transition: transform 0.28s ease, box-shadow 0.28s ease, border-color 0.28s ease;
+    overflow: hidden;
+    transition: transform 0.28s ease, box-shadow 0.28s ease, border-color 0.28s ease, background 0.28s ease;
     box-shadow: 0 12px 28px rgba(0, 0, 0, 0.28);
+}
+
+.itinerary-item::after {
+    content: "";
+    position: absolute;
+    inset: auto auto 0 0;
+    width: 0;
+    height: 4px;
+    border-radius: 999px;
+    background: linear-gradient(90deg, #7c4dff, #ff77ad, #ffd47a);
+    transition: width 0.35s ease;
 }
 
 .itinerary-item:hover,
 .itinerary-item:focus-visible {
-    transform: translateY(-4px);
+    transform: translateY(-2px);
     box-shadow: 0 18px 36px rgba(0, 0, 0, 0.38);
     border-color: rgba(255, 214, 225, 0.6);
     outline: none;
 }
 
 .itinerary-day {
-    display: inline-block;
+    display: block;
     font-size: 0.72rem;
     letter-spacing: 0.11em;
     text-transform: uppercase;
-    padding: 0.28rem 0.55rem;
-    border-radius: 999px;
-    background: rgba(255, 147, 177, 0.22);
-    border: 1px solid rgba(255, 255, 255, 0.28);
+    padding: 0;
+    border-radius: 0;
+    background: transparent;
+    border: 0;
     color: #ffdbe5;
 }
 
 .itinerary-item h3 {
-    margin: 0.55rem 0 0.35rem;
+    margin: 0.25rem 0 0;
     font-family: "Cinzel", serif;
-    font-size: 1.2rem;
+    font-size: clamp(0.88rem, 1.6vw, 1.08rem);
 }
 
 .itinerary-item p {
-    margin: 0 0 0.7rem;
+    display: none;
+    margin: 0;
     color: #ffeaf0;
     font-size: 0.94rem;
 }
 
 .itinerary-item.active {
+    background: rgba(255, 255, 255, 0.18);
     border-color: rgba(255, 214, 225, 0.74);
     box-shadow: 0 20px 38px rgba(0, 0, 0, 0.43);
+}
+
+.itinerary-item.active::after {
+    width: 100%;
 }
 
 .guest-badge {
@@ -949,15 +995,7 @@ p {
 }
 
 .itinerary-mini-cover {
-    position: absolute;
-    top: 0.78rem;
-    right: 0.85rem;
-    width: 72px;
-    height: 56px;
-    border-radius: 0.55rem;
-    overflow: hidden;
-    border: 1px solid rgba(255, 255, 255, 0.32);
-    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.28);
+    display: none;
 }
 
 .itinerary-mini-cover img {
@@ -967,12 +1005,179 @@ p {
 }
 
 .itinerary-page {
-    margin-top: 1rem;
+    position: relative;
+    display: grid;
+    grid-template-columns: minmax(0, 0.9fr) minmax(280px, 0.55fr);
+    gap: 0.9rem 1.1rem;
+    align-items: start;
+    margin-top: 0;
     border-radius: 1rem;
     border: 1px solid rgba(255, 255, 255, 0.3);
     background: linear-gradient(145deg, rgba(255, 245, 247, 0.2), rgba(24, 10, 19, 0.85));
     padding: 1.3rem 1.25rem;
     box-shadow: 0 24px 45px rgba(0, 0, 0, 0.45);
+}
+
+.itinerary-page:not(.is-fullscreen) .itinerary-tag,
+.itinerary-page:not(.is-fullscreen) .itinerary-page-head,
+.itinerary-page:not(.is-fullscreen) .itinerary-meta,
+.itinerary-page:not(.is-fullscreen) .itinerary-links,
+.itinerary-page:not(.is-fullscreen) .itinerary-details {
+    grid-column: 1;
+}
+
+.itinerary-page:not(.is-fullscreen) .itinerary-cover-wrap {
+    grid-column: 2;
+    grid-row: 1 / span 5;
+    align-self: center;
+    margin-top: 0;
+    position: relative;
+    padding: 0.45rem;
+    border-radius: 1.05rem;
+    overflow: hidden;
+    border: 1px solid rgba(255, 228, 238, 0.46);
+    background:
+        linear-gradient(145deg, rgba(255, 240, 246, 0.36), rgba(255, 144, 184, 0.08)),
+        rgba(23, 8, 16, 0.42);
+    box-shadow:
+        0 20px 42px rgba(0, 0, 0, 0.36),
+        0 0 0 1px rgba(255, 255, 255, 0.08) inset,
+        0 0 30px rgba(255, 161, 193, 0.22);
+}
+
+.itinerary-page:not(.is-fullscreen) .itinerary-cover-wrap::before {
+    content: "";
+    position: absolute;
+    inset: 0.45rem;
+    border-radius: 0.78rem;
+    border: 1px solid rgba(255, 255, 255, 0.34);
+    pointer-events: none;
+    z-index: 2;
+}
+
+.itinerary-page:not(.is-fullscreen) .itinerary-cover-wrap::after {
+    content: "";
+    position: absolute;
+    inset: -35% auto auto -25%;
+    width: 42%;
+    height: 170%;
+    transform: rotate(20deg);
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.28), transparent);
+    pointer-events: none;
+    z-index: 3;
+}
+
+.itinerary-page:not(.is-fullscreen) .rsvp-btn,
+.itinerary-page:not(.is-fullscreen) .guest-link,
+.itinerary-page:not(.is-fullscreen) .inline-map-link,
+.itinerary-page:not(.is-fullscreen) #itineraryMap,
+.itinerary-page:not(.is-fullscreen) .itinerary-program {
+    display: none;
+}
+
+.itinerary-page.is-fullscreen {
+    position: fixed;
+    inset: clamp(0.5rem, 1.4vw, 1.25rem);
+    z-index: 1200;
+    display: grid;
+    grid-template-columns: minmax(160px, 220px) minmax(300px, 0.75fr) minmax(420px, 1fr);
+    grid-template-rows: auto auto auto 1fr auto;
+    gap: 0.85rem 1.1rem;
+    overflow-y: auto;
+    padding: clamp(1.1rem, 2vw, 1.6rem);
+    background:
+        radial-gradient(circle at 18% 12%, rgba(255, 179, 202, 0.28), transparent 34%),
+        linear-gradient(145deg, rgba(52, 23, 39, 0.98), rgba(15, 6, 12, 0.96));
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+}
+
+.itinerary-page.is-fullscreen::-webkit-scrollbar {
+    width: 0;
+    height: 0;
+}
+
+.itinerary-fullscreen-close {
+    display: none;
+}
+
+.itinerary-page.is-fullscreen .itinerary-fullscreen-close {
+    display: inline-flex;
+}
+
+.itinerary-page.is-fullscreen .expand-btn {
+    display: none;
+}
+
+.itinerary-page.is-fullscreen .rsvp-btn,
+.itinerary-page.is-fullscreen .guest-link {
+    display: none;
+}
+
+.itinerary-page.is-fullscreen #itineraryMap,
+.itinerary-page.is-fullscreen .itinerary-program {
+    grid-column: 3;
+}
+
+.itinerary-page.is-fullscreen .itinerary-tag {
+    grid-column: 1 / 3;
+    grid-row: 1;
+}
+
+.itinerary-page.is-fullscreen .itinerary-cover-wrap {
+    grid-column: 1;
+    grid-row: 2 / span 2;
+    align-self: start;
+    margin-top: 0;
+}
+
+.itinerary-page.is-fullscreen .itinerary-cover-wrap img {
+    height: clamp(120px, 17svh, 170px);
+}
+
+.itinerary-page.is-fullscreen .itinerary-page-head {
+    grid-column: 2;
+    grid-row: 2;
+    margin-top: 0;
+}
+
+.itinerary-page.is-fullscreen .itinerary-meta {
+    grid-column: 2;
+    grid-row: 3;
+}
+
+.itinerary-page.is-fullscreen .itinerary-links {
+    grid-column: 1 / 3;
+    grid-row: 4;
+    align-self: start;
+}
+
+.itinerary-page.is-fullscreen #itineraryMap {
+    grid-row: 1 / span 2;
+    height: clamp(185px, 26svh, 240px);
+    margin-top: 0;
+}
+
+.itinerary-page.is-fullscreen .itinerary-program {
+    grid-row: 3 / span 2;
+    margin-top: 0;
+    min-height: 0;
+}
+
+.itinerary-page.is-fullscreen .event-timeline {
+    max-height: clamp(250px, 42svh, 390px);
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+}
+
+.itinerary-page.is-fullscreen .event-timeline::-webkit-scrollbar {
+    width: 0;
+    height: 0;
+}
+
+.itinerary-page.is-fullscreen .itinerary-details {
+    grid-column: 1 / -1;
+    grid-row: 5;
 }
 
 .itinerary-page-head {
@@ -1040,8 +1245,11 @@ p {
 .itinerary-cover-wrap img {
     display: block;
     width: 100%;
-    height: clamp(170px, 34vw, 260px);
+    height: clamp(210px, 25vw, 340px);
+    border-radius: 0.78rem;
     object-fit: cover;
+    object-position: center;
+    box-shadow: 0 14px 28px rgba(0, 0, 0, 0.32);
 }
 
 .section-head {
@@ -1325,15 +1533,15 @@ p {
 }
 
 .memory-sticky-deck {
-    position: sticky;
-    top: 5.15rem;
-    z-index: 12;
+    position: relative;
+    z-index: 2;
     margin-bottom: 1rem;
     backdrop-filter: blur(18px);
 }
 
 body.memory-playback-active .memory-sticky-deck {
-    top: 0.75rem;
+    top: auto;
+    margin-bottom: clamp(0.75rem, 1.4svh, 1rem);
 }
 
 .memory-intro-section {
@@ -1440,6 +1648,11 @@ body.memory-playback-active .memory-sticky-deck {
     min-height: min(720px, calc(100svh - 12rem));
 }
 
+body.memory-playback-active .memory-story-layout {
+    min-height: 0;
+    height: min(760px, calc(100svh - 14rem));
+}
+
 .memory-left {
     min-width: 0;
     overflow-y: auto;
@@ -1447,6 +1660,11 @@ body.memory-playback-active .memory-sticky-deck {
     max-height: min(720px, calc(100svh - 12rem));
     scrollbar-width: thin;
     scrollbar-color: rgba(255, 212, 225, 0.55) rgba(255, 255, 255, 0.08);
+}
+
+body.memory-playback-active .memory-left {
+    min-height: 0;
+    max-height: min(760px, calc(100svh - 14rem));
 }
 
 .memory-left::-webkit-scrollbar {
@@ -1516,13 +1734,26 @@ body.memory-playback-active .memory-sticky-deck {
 }
 
 .memory-card.is-playing-memory {
-    transform: translateX(6px);
-    border-color: rgba(255, 236, 245, 0.86);
-    box-shadow: 0 0 0 3px rgba(255, 218, 231, 0.16), 0 24px 46px rgba(0, 0, 0, 0.5);
+    transform: translateX(6px) scale(1.02);
+    border-color: rgba(255, 105, 180, 0.95);
+    background: linear-gradient(145deg, rgba(255, 200, 221, 0.2), rgba(255, 105, 180, 0.15));
+    box-shadow: 0 0 0 4px rgba(255, 105, 180, 0.25), 0 0 24px rgba(255, 105, 180, 0.4), 0 24px 46px rgba(0, 0, 0, 0.5);
+}
+
+.memory-card.is-playing-memory::before {
+    background: linear-gradient(140deg, #ff69b4, #ffc0cb);
+    box-shadow: 0 0 20px rgba(255, 105, 180, 0.9);
+    animation: diamondPulse 1.4s ease-in-out infinite;
 }
 
 .memory-card.is-playing-memory::after {
-    animation-duration: 1.8s;
+    animation-duration: 1.4s;
+    background: linear-gradient(
+        110deg,
+        rgba(255, 255, 255, 0) 0%,
+        rgba(255, 105, 180, 0.35) 46%,
+        rgba(255, 255, 255, 0) 100%
+    );
 }
 
 .memory-card::before {
@@ -1599,6 +1830,73 @@ body.memory-playback-active .memory-sticky-deck {
     backdrop-filter: blur(3px);
 }
 
+/* Milestone Cards */
+.memory-milestone-card {
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 1rem;
+    padding: 1.2rem;
+    background: linear-gradient(135deg, rgba(255, 105, 180, 0.15), rgba(255, 182, 193, 0.12));
+    border: 2px dashed rgba(255, 105, 180, 0.4);
+    border-radius: 1rem;
+    margin: 0.5rem 0;
+    transition: all 0.35s ease;
+}
+
+.memory-milestone-card:hover {
+    background: linear-gradient(135deg, rgba(255, 105, 180, 0.22), rgba(255, 182, 193, 0.18));
+    border-color: rgba(255, 105, 180, 0.6);
+    transform: scale(1.02);
+}
+
+.milestone-marker {
+    font-size: 1.8rem;
+    animation: milestoneFloat 2.8s ease-in-out infinite;
+}
+
+.milestone-content {
+    text-align: center;
+    flex: 1;
+}
+
+.milestone-label {
+    font-size: 0.95rem;
+    font-weight: 600;
+    background: linear-gradient(135deg, #ff69b4, #ff1493);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    letter-spacing: 0.08em;
+    margin: 0;
+}
+
+/* Avatar styling */
+.avatar-guy {
+    border: 2px solid rgba(100, 150, 255, 0.4) !important;
+    box-shadow: 0 0 12px rgba(100, 150, 255, 0.3) !important;
+}
+
+.avatar-girl {
+    border: 2px solid rgba(255, 150, 200, 0.4) !important;
+    box-shadow: 0 0 12px rgba(255, 150, 200, 0.3) !important;
+}
+
+.avatar-couple {
+    border: 2px solid rgba(255, 105, 180, 0.4) !important;
+    box-shadow: 0 0 12px rgba(255, 105, 180, 0.3) !important;
+}
+
+@keyframes milestoneFloat {
+    0%, 100% {
+        transform: translateY(0px);
+    }
+    50% {
+        transform: translateY(-8px);
+    }
+}
+
 .memory-content {
     padding: 0.9rem 1rem 1rem;
 }
@@ -1622,12 +1920,45 @@ body.memory-playback-active .memory-sticky-deck {
     color: #ffebef;
 }
 
+/* Milestone Mood Effects */
+.milestone-mood {
+    background: linear-gradient(135deg, rgba(255, 105, 180, 0.08), rgba(255, 182, 193, 0.06));
+    transition: background 1.5s ease-in-out;
+}
+
+.milestone-mood::before {
+    content: "";
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: radial-gradient(circle at center, rgba(255, 105, 180, 0.1) 0%, transparent 70%);
+    animation: milestoneGlow 3s ease-in-out infinite alternate;
+    pointer-events: none;
+    z-index: -1;
+}
+
+@keyframes milestoneGlow {
+    0% {
+        opacity: 0.3;
+    }
+    100% {
+        opacity: 0.7;
+    }
+}
+
 .memory-visual-panel {
     overflow: hidden;
     padding: 1rem;
     min-height: min(720px, calc(100svh - 12rem));
     max-height: min(720px, calc(100svh - 12rem));
     display: flex;
+}
+
+body.memory-playback-active .memory-visual-panel {
+    min-height: 0;
+    max-height: min(760px, calc(100svh - 14rem));
 }
 
 .memory-visual-panel .memory-stage {
@@ -2920,7 +3251,38 @@ body.countdown-tab-active .music-control {
     }
 
     .itinerary-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    .itinerary-page.is-fullscreen {
         grid-template-columns: 1fr;
+        grid-template-rows: none;
+    }
+
+    .itinerary-page:not(.is-fullscreen) {
+        grid-template-columns: 1fr;
+    }
+
+    .itinerary-page:not(.is-fullscreen) .itinerary-tag,
+    .itinerary-page:not(.is-fullscreen) .itinerary-page-head,
+    .itinerary-page:not(.is-fullscreen) .itinerary-meta,
+    .itinerary-page:not(.is-fullscreen) .itinerary-links,
+    .itinerary-page:not(.is-fullscreen) .itinerary-details,
+    .itinerary-page:not(.is-fullscreen) .itinerary-cover-wrap {
+        grid-column: 1;
+        grid-row: auto;
+    }
+
+    .itinerary-page.is-fullscreen .itinerary-tag,
+    .itinerary-page.is-fullscreen .itinerary-page-head,
+    .itinerary-page.is-fullscreen .itinerary-meta,
+    .itinerary-page.is-fullscreen .itinerary-links,
+    .itinerary-page.is-fullscreen .itinerary-cover-wrap,
+    .itinerary-page.is-fullscreen #itineraryMap,
+    .itinerary-page.is-fullscreen .itinerary-program,
+    .itinerary-page.is-fullscreen .itinerary-details {
+        grid-column: 1;
+        grid-row: auto;
     }
 
     .partners-grid {
@@ -3037,8 +3399,12 @@ body.countdown-tab-active .music-control {
         padding: 0.8rem 0.82rem 0.9rem;
     }
 
+    .itinerary-grid {
+        grid-template-columns: 1fr;
+    }
+
     .itinerary-item {
-        padding-right: 6rem;
+        padding: 0.82rem 0.75rem 0.88rem;
     }
 
     .timer-cover figcaption {

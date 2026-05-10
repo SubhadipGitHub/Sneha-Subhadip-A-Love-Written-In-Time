@@ -22,6 +22,15 @@ const tabVisibilityConfig = Object.freeze({
     letter: false
 });
 
+// Set any wedding event to false to hide that event tab from the Wedding Itinerary.
+const itineraryEventVisibilityConfig = Object.freeze({
+    "Engagement Ceremony": true,
+    "Sangeet Night": false,
+    "Haldi Ceremony": false,
+    "Wedding Ceremony": false,
+    "Reception Evening": false
+});
+
 const unlockBtn = document.getElementById("unlockBtn");
 const secretInput = document.getElementById("secretInput");
 const secretMessage = document.getElementById("secretMessage");
@@ -73,6 +82,8 @@ const itineraryMapInlineLink = document.getElementById("itineraryMapInlineLink")
 const itineraryMap = document.getElementById("itineraryMap");
 const itineraryTimeline = document.getElementById("itineraryTimeline");
 const itineraryDetails = document.getElementById("itineraryDetails");
+const itineraryFullscreenBtn = document.getElementById("itineraryFullscreenBtn");
+const itineraryFullscreenClose = document.getElementById("itineraryFullscreenClose");
 const openWishesBtn = document.getElementById("openWishesBtn");
 const weddingWishesPanel = document.getElementById("weddingWishesPanel");
 const wishesForm = document.getElementById("wishesForm");
@@ -97,8 +108,15 @@ const bgMusic = document.getElementById("bgMusic");
 const musicToggleBtn = document.getElementById("musicToggleBtn");
 const musicStatus = document.getElementById("musicStatus");
 const defaultMusicTracks = ["audio/romantic.mp4", "audio/romantic_1.mp3"];
+const categoryMusicTracks = {
+    guy: ["audio/calm.mp3"],
+    girl: ["audio/warm.mp3"],
+    couple: ["audio/romantic.mp4", "audio/romantic_1.mp3"],
+    finale: ["audio/epic.mp3"]
+};
 const wishesStorageKey = "wedding_wishes_v1";
 let activeItineraryItem = null;
+let itineraryRotationTimer = null;
 let wishesData = [];
 let wishesRefreshTimer = null;
 let popAudioCtx = null;
@@ -109,8 +127,13 @@ let memoryPlaybackTimer = null;
 let activeMemoryIndex = -1;
 let isMemoryPlaybackRunning = false;
 let musicStartedByMemoryPlayback = false;
-const defaultImageMemoryDuration = 5000;
-const defaultVideoMemoryDuration = 18000;
+let currentMemoryCategory = null;
+
+// Update memory-card wait times here. Values are in milliseconds: 10000 = 10 seconds.
+const memoryPlaybackDurations = {
+    defaultCard: 10000,
+    videoCard: 10000
+};
 
 function syncModalBodyLock() {
     const hasOpenModal = Boolean(document.querySelector(".lightbox.open"));
@@ -481,6 +504,9 @@ function setupMemoryLightbox() {
         if (event.key === "Escape" && wishFormModal?.classList.contains("open")) {
             closeWishFormModal();
         }
+        if (event.key === "Escape" && itineraryPage?.classList.contains("is-fullscreen")) {
+            closeItineraryFullscreen();
+        }
     });
 }
 
@@ -504,7 +530,7 @@ function getMemoryVideoEmbed(card) {
 function getMemoryPlaybackDuration(card) {
     const customDuration = Number(card?.dataset.duration || card?.dataset.videoDuration || 0);
     if (Number.isFinite(customDuration) && customDuration > 0) return customDuration;
-    return getMemoryVideoEmbed(card) ? defaultVideoMemoryDuration : defaultImageMemoryDuration;
+    return getMemoryVideoEmbed(card) ? memoryPlaybackDurations.videoCard : memoryPlaybackDurations.defaultCard;
 }
 
 function updateMemoryStage(card) {
@@ -573,6 +599,25 @@ function updateMemoryPlaybackUi(isPlaying) {
     }
 }
 
+function centerMemoryPlaybackView() {
+    if (!memoriesPanel) return;
+
+    window.requestAnimationFrame(() => {
+        memoriesPanel.scrollIntoView({ behavior: "smooth", block: "center" });
+    });
+}
+
+function isFinalMemoryCard(card) {
+    const orderedCards = getOrderedMemoryCards();
+    return orderedCards.length > 0 && card === orderedCards[orderedCards.length - 1];
+}
+
+function getMemoryCategory(card) {
+    if (isFinalMemoryCard(card)) return "finale";
+    if (card.classList.contains("memory-milestone-card")) return "milestone";
+    return card.dataset.person || "couple";
+}
+
 function setActiveMemory(index, shouldScroll = true) {
     const orderedCards = getOrderedMemoryCards();
     if (!orderedCards.length) return;
@@ -585,6 +630,18 @@ function setActiveMemory(index, shouldScroll = true) {
     });
 
     const activeCard = orderedCards[safeIndex];
+    const category = getMemoryCategory(activeCard);
+    
+    // Only switch music if category changes from previous
+    if (category !== currentMemoryCategory) {
+        currentMemoryCategory = category;
+        switchMemoryForCategory(category);
+    }
+
+    // Add milestone mood effect
+    const isMilestone = category === "milestone";
+    document.body.classList.toggle("milestone-mood", isMilestone);
+
     const date = activeCard.querySelector(".memory-date")?.textContent?.trim() || "Our story";
     const title = activeCard.querySelector("h3")?.textContent?.trim() || "Memory";
 
@@ -661,6 +718,7 @@ function pauseMemoryPlayback() {
     isMemoryPlaybackRunning = false;
     updateMemoryPlaybackUi(false);
     stopMemoryPlaybackMusic();
+    currentMemoryCategory = null;
     if (memoryStageVideo) {
         memoryStageVideo.src = "";
         memoryStageVideo.style.display = "none";
@@ -686,6 +744,7 @@ function startMemoryPlayback(reset = false) {
 
     isMemoryPlaybackRunning = true;
     updateMemoryPlaybackUi(true);
+    centerMemoryPlaybackView();
     void startMemoryPlaybackMusic();
     scheduleNextMemory(orderedCards[activeMemoryIndex]);
 }
@@ -1165,20 +1224,97 @@ function openItineraryPage(item) {
     itineraryDetails.textContent = item.dataset.details || "";
 }
 
+function isItineraryEventVisible(item) {
+    const eventName = item?.dataset.event || "";
+    return itineraryEventVisibilityConfig[eventName] !== false;
+}
+
+function getVisibleItineraryItems() {
+    return itineraryItems.filter(isItineraryEventVisible);
+}
+
+function applyItineraryEventVisibilityConfig() {
+    itineraryItems.forEach((item) => {
+        const visible = isItineraryEventVisible(item);
+        item.hidden = !visible;
+        item.setAttribute("aria-hidden", visible ? "false" : "true");
+        if (!visible) {
+            item.classList.remove("active");
+            item.setAttribute("aria-selected", "false");
+            item.setAttribute("tabindex", "-1");
+        }
+    });
+}
+
+function selectItineraryItem(item, shouldScroll = false) {
+    if (!item || !isItineraryEventVisible(item)) return;
+
+    itineraryItems.forEach((card) => {
+        const isActive = card === item;
+        card.classList.toggle("active", isActive);
+        card.setAttribute("aria-selected", isActive ? "true" : "false");
+        card.setAttribute("tabindex", isActive ? "0" : "-1");
+    });
+
+    openItineraryPage(item);
+
+    if (shouldScroll && window.innerWidth <= 860) {
+        itineraryPage.scrollIntoView({ behavior: "smooth", block: "start" });
+    }
+}
+
+function rotateItineraryTabs() {
+    const visibleItems = getVisibleItineraryItems();
+    if (
+        !visibleItems.length ||
+        itineraryPage?.classList.contains("is-fullscreen") ||
+        activityModal?.classList.contains("open")
+    ) return;
+
+    const currentIndex = Math.max(0, visibleItems.indexOf(activeItineraryItem));
+    const nextItem = visibleItems[(currentIndex + 1) % visibleItems.length];
+    selectItineraryItem(nextItem);
+}
+
+function restartItineraryRotation() {
+    if (itineraryRotationTimer) {
+        clearInterval(itineraryRotationTimer);
+    }
+
+    itineraryRotationTimer = setInterval(rotateItineraryTabs, 7000);
+}
+
+function openItineraryFullscreen() {
+    if (!itineraryPage) return;
+
+    itineraryPage.classList.add("is-fullscreen");
+    itineraryPage.setAttribute("aria-modal", "true");
+    document.body.classList.add("modal-open");
+    itineraryFullscreenClose?.focus();
+}
+
+function closeItineraryFullscreen() {
+    if (!itineraryPage) return;
+
+    itineraryPage.classList.remove("is-fullscreen");
+    itineraryPage.removeAttribute("aria-modal");
+    document.body.classList.remove("modal-open");
+    itineraryFullscreenBtn?.focus();
+}
+
 function setupWeddingItinerary() {
     if (!itineraryItems.length || !itineraryPage) return;
 
+    applyItineraryEventVisibilityConfig();
     enrichItineraryCards();
 
-    itineraryItems.forEach((item) => {
-        const openDetails = () => {
-            itineraryItems.forEach((card) => card.classList.remove("active"));
-            item.classList.add("active");
-            openItineraryPage(item);
+    itineraryItems.forEach((item, index) => {
+        item.id = item.id || `itinerary-tab-${index + 1}`;
+        item.setAttribute("aria-controls", "itineraryPage");
 
-            if (window.innerWidth <= 860) {
-                itineraryPage.scrollIntoView({ behavior: "smooth", block: "start" });
-            }
+        const openDetails = () => {
+            selectItineraryItem(item, true);
+            restartItineraryRotation();
         };
 
         item.addEventListener("click", openDetails);
@@ -1190,11 +1326,15 @@ function setupWeddingItinerary() {
         });
     });
 
-    const defaultItem = itineraryItems[0];
+    const defaultItem = getVisibleItineraryItems()[0];
     if (defaultItem) {
-        defaultItem.classList.add("active");
-        openItineraryPage(defaultItem);
+        selectItineraryItem(defaultItem);
     }
+
+    restartItineraryRotation();
+
+    itineraryFullscreenBtn?.addEventListener("click", openItineraryFullscreen);
+    itineraryFullscreenClose?.addEventListener("click", closeItineraryFullscreen);
 
     setInterval(() => {
         if (!activeItineraryItem) return;
@@ -1224,6 +1364,15 @@ function resolveMusicPlaylist() {
     return tracks.length ? tracks : defaultMusicTracks;
 }
 
+function switchMemoryForCategory(category) {
+    const tracks = categoryMusicTracks[category] || defaultMusicTracks;
+    const randomTrack = tracks[Math.floor(Math.random() * tracks.length)];
+    
+    // Preserve playback state when switching tracks
+    const wasPlaying = bgMusic && !bgMusic.paused;
+    setMusicSource(randomTrack, wasPlaying);
+}
+
 function getAudioMimeType(track) {
     const normalized = (track || "").toLowerCase();
     if (normalized.endsWith(".mp3")) return "audio/mpeg";
@@ -1232,7 +1381,7 @@ function getAudioMimeType(track) {
     return "audio/mp4";
 }
 
-function setMusicSource(track) {
+function setMusicSource(track, shouldAutoPlay = false) {
     if (!track) return;
 
     const source = bgMusic.querySelector("source");
@@ -1243,6 +1392,34 @@ function setMusicSource(track) {
 
     bgMusic.src = track;
     bgMusic.load();
+    
+    // Resume playback if it was playing before the source change
+    if (shouldAutoPlay && musicStartedByMemoryPlayback) {
+        let playAttempted = false;
+        
+        const resumePlayback = () => {
+            if (playAttempted) return;
+            playAttempted = true;
+            
+            bgMusic.play().catch(() => {
+                // Silent catch - browser autoplay restrictions may prevent this
+            });
+            
+            bgMusic.removeEventListener("canplay", resumePlayback);
+            clearTimeout(playbackTimeout);
+        };
+        
+        // Set timeout fallback in case canplay doesn't fire
+        const playbackTimeout = setTimeout(() => {
+            if (!playAttempted) {
+                playAttempted = true;
+                bgMusic.play().catch(() => {});
+                bgMusic.removeEventListener("canplay", resumePlayback);
+            }
+        }, 5000);
+        
+        bgMusic.addEventListener("canplay", resumePlayback, { once: true });
+    }
 }
 
 function setupRandomMusicStart() {
@@ -1812,6 +1989,12 @@ function setupWeddingWishes() {
     }
 }
 
+function setupHeroAutoHide() {
+    window.setTimeout(() => {
+        document.body.classList.add("hero-auto-hidden");
+    }, 15000);
+}
+
 unlockBtn.addEventListener("click", unlockLoveLetter);
 secretInput.addEventListener("keydown", (event) => {
     if (event.key === "Enter") {
@@ -1833,5 +2016,6 @@ setupWishShareLink();
 setupWeddingItinerary();
 setupWeddingWishes();
 setupBackgroundMusic();
+setupHeroAutoHide();
 updateTimers();
 setInterval(updateTimers, 1000);

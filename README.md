@@ -23,6 +23,7 @@ const tabVisibilityConfig = Object.freeze({
     home: true,
     countdown: true,
     memories: true,
+    partners: false,
     letter: false
 });
 ```
@@ -45,7 +46,103 @@ Important CSS safeguard in `style.css`:
 
 This prevents hidden tabs from reappearing due to `display` rules.
 
-## 2) Countdown + Share QR Block Placement
+## 2) Wedding Event Visibility
+
+Wedding Itinerary event tabs are also configurable from `script.js`:
+
+```js
+const itineraryEventVisibilityConfig = Object.freeze({
+    "Engagement Ceremony": true,
+    "Sangeet Night": true,
+    "Haldi Ceremony": true,
+    "Wedding Ceremony": true,
+    "Reception Evening": true
+});
+```
+
+Set an event to `false` to hide it from the Wedding Itinerary tab row. The auto-rotating event preview and default selected event automatically use only visible events.
+
+Example:
+
+```js
+"Reception Evening": false
+```
+
+## 3) Wedding Itinerary Data
+
+Each wedding event is configured in `index.html` on its `.itinerary-item` button. Common fields:
+
+- `data-event` - full event name used by the JS config
+- `data-date`, `data-time`, `data-guest-time`
+- `data-location`, `data-map-query`
+- `data-details`
+- `data-cover`
+- `data-upload`, `data-rsvp`, `data-guest-list`
+- `data-total`, `data-attending`
+- `data-program`
+
+Program format:
+
+```html
+data-program="category|time|title;category|time|title"
+```
+
+Supported categories include `performances`, `games`, and `food`.
+
+## 4) Memory Playback Timing
+
+Default memory card wait times are configured in `script.js`:
+
+```js
+const memoryPlaybackDurations = {
+    defaultCard: 10000,
+    videoCard: 10000
+};
+```
+
+Values are milliseconds. `10000` means 10 seconds.
+
+Per-card overrides can be added directly in `index.html`:
+
+```html
+data-duration="15000"
+data-video-duration="25000"
+```
+
+## 5) Memory Music
+
+Memory playback music is configured in `script.js`:
+
+```js
+const categoryMusicTracks = {
+    guy: ["audio/calm.mp3"],
+    girl: ["audio/warm.mp3"],
+    couple: ["audio/romantic.mp4", "audio/romantic_1.mp3"],
+    finale: ["audio/epic.mp3"]
+};
+```
+
+Notes:
+
+- Cards use `data-person` to choose a category.
+- The final memory card uses the `finale` track.
+- Milestone cards do not trigger `epic.mp3`.
+
+## 6) Hero Auto Hide
+
+The header hero automatically collapses after 15 seconds to give all tabs more screen space. This is configured in `script.js`:
+
+```js
+function setupHeroAutoHide() {
+    window.setTimeout(() => {
+        document.body.classList.add("hero-auto-hidden");
+    }, 15000);
+}
+```
+
+Change `15000` to adjust the delay.
+
+## 7) Countdown + Share QR Block Placement
 
 The `wish-share-panel` is placed in the Countdown card directly below the wedding counter area (as requested).
 
@@ -55,7 +152,7 @@ It includes:
 - Dynamic wish page link (`#wishPageUrl`)
 - Instruction title text
 
-## 3) Dynamic Wish Page URL + QR Generation
+## 8) Dynamic Wish Page URL + QR Generation
 
 In `script.js` (`setupWishShareLink` + `resolveWishPageUrl`):
 
@@ -70,7 +167,7 @@ QR rendering:
 
 This improves reliability if one provider is blocked/unavailable.
 
-## 4) Separate Public Wishes Page
+## 9) Separate Public Wishes Page
 
 A dedicated page for guests:
 
@@ -82,7 +179,7 @@ A dedicated page for guests:
 - Accessible reduced-motion fallback
 - Shared favicon via `images/favicon.ico`
 
-## 5) Wishes Submission Logic
+## 10) Wishes Submission Logic
 
 `wishes-submit.js` handles:
 
@@ -107,7 +204,7 @@ Submission method:
 - `fetch(..., { method: "POST", mode: "no-cors" })`
 - Keeps UX smooth without redirecting users away from `wishes.html`
 
-## 6) Wishes Garden on Main Page
+## 11) Wishes Garden on Main Page
 
 Main-page wishes section includes:
 
@@ -122,9 +219,9 @@ Note:
 - Local bubble display uses browser `localStorage`
 - Google Form submission is also sent in parallel from `wishes.html`
 
-## 7) Background Music Playlist
+## 12) Background Music Playlist
 
-Music list updated to include all current tracks:
+Default background music list:
 
 - `audio/romantic.mp4`
 - `audio/romantic_1.mp3`
@@ -135,7 +232,7 @@ Behavior:
 - Play/Pause toggle control
 - Randomized safe start position within track
 
-## 8) Styling Enhancements Added
+## 13) Styling Enhancements Added
 
 - QR share card made compact and more attractive
 - QR section animation upgrades:
@@ -146,9 +243,28 @@ Behavior:
 
 ## Local Development
 
-This is a static site.
+This is a static site, but it should be opened through a local server rather than by double-clicking `index.html`.
 
-Run with any static server, for example:
+Recommended VS Code setup:
+
+1. Install the VS Code extension **Live Server** by Ritwick Dey.
+2. Open this repo folder in VS Code.
+3. Right-click `index.html`.
+4. Choose **Open with Live Server**.
+
+Typical URLs:
+
+- Main page: `http://127.0.0.1:5500/index.html`
+- Wishes page: `http://127.0.0.1:5500/wishes.html`
+
+Why Live Server matters:
+
+- YouTube iframe embeds render more reliably.
+- Local media/audio behavior is closer to deployment.
+- QR URL generation can resolve a real local URL.
+- Browser security restrictions are reduced compared with `file://`.
+
+Alternative static server:
 
 ```powershell
 # From repo root
@@ -171,6 +287,8 @@ For GitHub Pages:
 
 - If browser cache is stale, UI changes may not appear immediately. Use hard refresh (`Ctrl+F5`).
 - `no-cors` Google Form requests cannot expose detailed response data to JavaScript, so success is inferred from request completion.
+- Browser autoplay rules can block music until the user clicks a play control.
+- YouTube videos and some iframe features may not behave correctly from `file://`; use Live Server.
 
 ## Recent Key Files Updated
 
