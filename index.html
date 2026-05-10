@@ -349,122 +349,205 @@
         </section>
 
         <section id="memories" class="tab-panel reveal" aria-labelledby="memories-tab">
-            <div class="glass-card memory-intro-section">
+            <div class="memory-sticky-deck glass-card memory-intro-section">
                 <div class="section-head centered">
                     <h2>Memory Timeline</h2>
-                    <p>A dated journey of moments that built our forever.</p>
+                    <p>From two first breaths, to one first meeting, to every little forever after.</p>
+                </div>
+                <div class="memory-player" aria-label="Memory timeline playback controls">
+                    <button id="memoryPlayToggle" class="memory-play-btn" type="button" aria-pressed="false">
+                        <span class="memory-play-icon" aria-hidden="true"></span>
+                        <span class="memory-play-label">Play Memories</span>
+                    </button>
+                    <button id="memoryReplayBtn" class="memory-replay-btn" type="button">Replay</button>
+                    <div class="memory-player-copy">
+                        <p id="memoryPlayStatus">Ready to walk through the story.</p>
+                        <div class="memory-progress" aria-hidden="true">
+                            <span id="memoryProgressFill"></span>
+                        </div>
+                    </div>
                 </div>
             </div>
 
-            <div class="memory-grid memory-timeline">
-                <article class="memory-card reveal">
-                    <img src="images/Kunafa.png" alt="Dessert date memory">
-                    <div class="memory-content">
-                        <p class="memory-date">March 1, 2025</p>
-                        <h3>Kunafa</h3>
-                        <p>Sharing Kunafa on our first date, sweet like the beginning of us.</p>
-                    </div>
-                </article>
-                <article class="memory-card reveal">
-                    <img src="images/iscon.png" alt="IISCON temple memory">
-                    <div class="memory-content">
-                        <p class="memory-date">March 14, 2025</p>
-                        <h3>IISCON Visit</h3>
-                        <p>Our first visit to IISCON temple, where we found peace and reflection.</p>
-                    </div>
-                </article>
-            </div>
+            <div class="memory-story-layout">
+                <aside class="memory-visual-panel glass-card" aria-live="polite">
+                    <figure class="memory-stage">
+                        <img id="memoryStageImage" src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTXjqXNvuBWTf9B77ZZy4PLWlkAzGQMoXgrow&amp;s" alt="Selected memory">
+                        <iframe
+                            id="memoryStageVideo"
+                            class="memory-stage-video"
+                            src=""
+                            title="Selected memory video"
+                            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                            allowfullscreen
+                        ></iframe>
+                        <figcaption>
+                            <p id="memoryStageDate">July 9, 1993</p>
+                            <h3 id="memoryStageTitle">Subhadip Arrives</h3>
+                            <span id="memoryStageLocation">Subhadip's hometown</span>
+                        </figcaption>
+                    </figure>
+                </aside>
 
-            <div class="memory-grid memory-timeline">
-                
-                <article class="memory-card reveal">
-                    <img src="images/wayanad.jpg" alt="Nature travel memory">
-                    <div class="memory-content">
-                        <p class="memory-date">April 20, 2025</p>
-                        <h3>Wayanad</h3>
-                        <p>Our first trip, where silence, mist, and love all felt endless.</p>
+                <div class="memory-left glass-card">
+                    <div class="memory-timeline" aria-label="Romantic memory timeline">
+                        <article class="memory-card memory-era-card reveal" data-memory-order="1" data-person="guy" data-location="Subhadip's hometown" data-map-x="18" data-map-y="30" data-image="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTXjqXNvuBWTf9B77ZZy4PLWlkAzGQMoXgrow&amp;s">
+                            <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTXjqXNvuBWTf9B77ZZy4PLWlkAzGQMoXgrow&amp;s" alt="Subhadip timeline icon">
+                            <div class="memory-content">
+                                <p class="memory-date">July 9, 1993</p>
+                                <h3>Subhadip Arrives</h3>
+                                <p>A kind heart began its journey, gathering patience, laughter, and love for a future still unseen.</p>
+                            </div>
+                        </article>
+                        <article class="memory-card memory-era-card reveal" data-memory-order="2" data-person="guy" data-location="Childhood days" data-map-x="24" data-map-y="38" data-image="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTXjqXNvuBWTf9B77ZZy4PLWlkAzGQMoXgrow&amp;s">
+                            <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTXjqXNvuBWTf9B77ZZy4PLWlkAzGQMoXgrow&amp;s" alt="Subhadip childhood placeholder">
+                            <div class="memory-content">
+                                <p class="memory-date">Growing Years</p>
+                                <h3>His Quiet Becoming</h3>
+                                <p>School days, family love, and small victories shaped the calm strength Sneha would one day adore.</p>
+                            </div>
+                        </article>
+                        <article class="memory-card memory-era-card reveal" data-memory-order="3" data-person="girl" data-location="Sneha's hometown" data-map-x="75" data-map-y="32" data-image="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSDBBhjgAcJHAv7Iz3Z0lEvX_1f7YrOsHgaKA&amp;s">
+                            <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSDBBhjgAcJHAv7Iz3Z0lEvX_1f7YrOsHgaKA&amp;s" alt="Sneha timeline icon">
+                            <div class="memory-content">
+                                <p class="memory-date">June 20, 1997</p>
+                                <h3>Sneha Arrives</h3>
+                                <p>A graceful soul entered the world, carrying warmth bright enough to turn ordinary days golden.</p>
+                            </div>
+                        </article>
+                        <article class="memory-card memory-era-card reveal" data-memory-order="4" data-person="girl" data-location="Growing dreams" data-map-x="69" data-map-y="42" data-image="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSDBBhjgAcJHAv7Iz3Z0lEvX_1f7YrOsHgaKA&amp;s">
+                            <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSDBBhjgAcJHAv7Iz3Z0lEvX_1f7YrOsHgaKA&amp;s" alt="Sneha growing years placeholder">
+                            <div class="memory-content">
+                                <p class="memory-date">Growing Years</p>
+                                <h3>Her Bright Becoming</h3>
+                                <p>Dreams, prayers, friendships, and family blessings quietly prepared her for a love that would feel destined.</p>
+                            </div>
+                        </article>
+                        <article class="memory-card memory-era-card reveal" data-memory-order="5" data-person="couple" data-location="Bengaluru" data-map-x="48" data-map-y="50" data-image="https://img.freepik.com/free-vector/cute-couple-boy-girl-sitting-together-cartoon-vector-icon-illustration-people-holiday-icon-conc_138676-12418.jpg?semt=ais_hybrid&amp;w=740&amp;q=80">
+                            <img src="https://img.freepik.com/free-vector/cute-couple-boy-girl-sitting-together-cartoon-vector-icon-illustration-people-holiday-icon-conc_138676-12418.jpg?semt=ais_hybrid&amp;w=740&amp;q=80" alt="Couple destiny placeholder">
+                            <div class="memory-content">
+                                <p class="memory-date">Before March 2025</p>
+                                <h3>Two Roads Lean Closer</h3>
+                                <p>Life kept drawing invisible lines between them until two separate stories were ready to become one.</p>
+                            </div>
+                        </article>
+                        <article class="memory-card reveal" data-memory-order="6" data-person="couple" data-location="Kunafa date, Bengaluru" data-map-x="50" data-map-y="55" data-image="images/Kunafa.png">
+                            <img src="images/Kunafa.png" alt="Dessert date memory">
+                            <div class="memory-content">
+                                <p class="memory-date">March 1, 2025</p>
+                                <h3>Kunafa</h3>
+                                <p>Sharing Kunafa on our first date, sweet like the beginning of us.</p>
+                            </div>
+                        </article>
+                        <article class="memory-card reveal" data-memory-order="7" data-person="couple" data-location="ISKCON Temple, Bengaluru" data-map-x="42" data-map-y="44" data-image="images/iscon.png">
+                            <img src="images/iscon.png" alt="ISKCON temple memory">
+                            <div class="memory-content">
+                                <p class="memory-date">March 14, 2025</p>
+                                <h3>ISKCON Visit</h3>
+                                <p>Our first temple visit, where peace, prayer, and reflection made love feel sacred.</p>
+                            </div>
+                        </article>
+                        <article class="memory-card reveal" data-memory-order="8" data-person="couple" data-location="Wayanad, Kerala" data-map-x="32" data-map-y="73" data-image="images/wayanad.jpg">
+                            <img src="images/wayanad.jpg" alt="Nature travel memory">
+                            <div class="memory-content">
+                                <p class="memory-date">April 20, 2025</p>
+                                <h3>Wayanad</h3>
+                                <p>Our first trip, where silence, mist, and love all felt endless.</p>
+                            </div>
+                        </article>
+                        <article class="memory-card memory-placeholder-card reveal" data-memory-order="9" data-person="couple" data-location="Everyday calls" data-map-x="55" data-map-y="50" data-image="https://img.freepik.com/free-vector/cute-couple-boy-girl-sitting-together-cartoon-vector-icon-illustration-people-holiday-icon-conc_138676-12418.jpg?semt=ais_hybrid&amp;w=740&amp;q=80">
+                            <img src="https://img.freepik.com/free-vector/cute-couple-boy-girl-sitting-together-cartoon-vector-icon-illustration-people-holiday-icon-conc_138676-12418.jpg?semt=ais_hybrid&amp;w=740&amp;q=80" alt="Everyday love placeholder">
+                            <div class="memory-content">
+                                <p class="memory-date">May 2025</p>
+                                <h3>Ordinary Magic</h3>
+                                <p>Good morning texts, late-night calls, and tiny check-ins became the soft routine of belonging.</p>
+                            </div>
+                        </article>
+                        <article class="memory-card reveal" data-memory-order="10" data-person="couple" data-location="Dance floor" data-map-x="58" data-map-y="47" data-image="images/fance.png">
+                            <img src="images/fance.png" alt="Dance and music memory">
+                            <div class="memory-content">
+                                <p class="memory-date">May 12, 2025</p>
+                                <h3>First Dance</h3>
+                                <p>Just us and the music, dancing like the world had paused for us.</p>
+                            </div>
+                        </article>
+                        <article class="memory-card reveal" data-memory-order="11" data-person="couple" data-location="Bengaluru roads" data-map-x="63" data-map-y="58" data-image="images/bike.png">
+                            <img src="images/bike.png" alt="Bike ride memory">
+                            <div class="memory-content">
+                                <p class="memory-date">June 1, 2025</p>
+                                <h3>First Ride</h3>
+                                <p>Wind in our faces, your arms around me, and laughter in every turn.</p>
+                            </div>
+                        </article>
+                        <article class="memory-card reveal" data-memory-order="12" data-person="couple" data-location="Agara Lake, Bengaluru" data-map-x="60" data-map-y="62" data-image="images/agara.jpeg">
+                            <img src="images/agara.jpeg" alt="Lake sunset memory">
+                            <div class="memory-content">
+                                <p class="memory-date">June 21, 2025</p>
+                                <h3>Agara Lake</h3>
+                                <p>Golden sunset, quiet water, and a memory that still glows.</p>
+                            </div>
+                        </article>
+                        <article class="memory-card memory-placeholder-card reveal" data-memory-order="13" data-person="couple" data-location="Family blessings" data-map-x="46" data-map-y="39" data-image="https://img.freepik.com/free-vector/cute-couple-boy-girl-sitting-together-cartoon-vector-icon-illustration-people-holiday-icon-conc_138676-12418.jpg?semt=ais_hybrid&amp;w=740&amp;q=80">
+                            <img src="https://img.freepik.com/free-vector/cute-couple-boy-girl-sitting-together-cartoon-vector-icon-illustration-people-holiday-icon-conc_138676-12418.jpg?semt=ais_hybrid&amp;w=740&amp;q=80" alt="Family blessings placeholder">
+                            <div class="memory-content">
+                                <p class="memory-date">Late 2025</p>
+                                <h3>Love Gets Roots</h3>
+                                <p>The story grew deeper through family conversations, shared hopes, and the first shape of forever.</p>
+                            </div>
+                        </article>
+                        <article class="memory-card reveal" data-memory-order="14" data-person="couple" data-location="New Year celebration" data-map-x="52" data-map-y="35" data-image="images/new_year.png">
+                            <img src="images/new_year.png" alt="New Year celebration memory">
+                            <div class="memory-content">
+                                <p class="memory-date">December 31, 2025</p>
+                                <h3>New Year</h3>
+                                <p>Midnight smiles, chocolates, and the soft magic of new beginnings.</p>
+                            </div>
+                        </article>
+                        <article class="memory-card reveal" data-memory-order="15" data-person="couple" data-location="Marriage decision" data-map-x="56" data-map-y="34" data-image="images/engaged.png">
+                            <img src="images/engaged.png" alt="Engagement ring decision memory">
+                            <div class="memory-content">
+                                <p class="memory-date">January 5, 2026</p>
+                                <h3>Marriage Decision</h3>
+                                <p>The day we said yes to forever and felt our future become real.</p>
+                            </div>
+                        </article>
+                        <article class="memory-card reveal" data-memory-order="16" data-person="couple" data-location="Ooty, Tamil Nadu" data-map-x="39" data-map-y="78" data-image="images/ooty.jpg">
+                            <img src="images/ooty.jpg" alt="Ooty trip hills memory">
+                            <div class="memory-content">
+                                <p class="memory-date">February 2, 2026</p>
+                                <h3>Ooty Trip</h3>
+                                <p>One last getaway before wedding plans turned into our next chapter.</p>
+                            </div>
+                        </article>
+                        <article class="memory-card reveal" data-memory-order="17" data-person="couple" data-location="Dance rehearsal" data-map-x="61" data-map-y="45" data-video="https://www.youtube.com/watch?v=arORSq2Ftg0" data-video-duration="25000" data-image="images/fance.png">
+                            <div class="memory-media">
+                                <img src="images/fance.png" alt="Cover image for Dance video">
+                                <span class="video-badge" aria-hidden="true">Play</span>
+                            </div>
+                            <div class="memory-content">
+                                <p class="memory-date">February 6, 2026</p>
+                                <h3>Dance Video</h3>
+                                <p>A romantic video of our dance before the wedding.</p>
+                            </div>
+                        </article>
+                        <article class="memory-card reveal" data-memory-order="18" data-person="couple" data-location="Valentine date" data-map-x="65" data-map-y="52" data-image="images/valentine.jpg">
+                            <img src="images/valentine.jpg" alt="Romantic candlelight date memory">
+                            <div class="memory-content">
+                                <p class="memory-date">February 14, 2026</p>
+                                <h3>Valentine Day</h3>
+                                <p>Candlelight, music, and heartbeats perfectly in sync.</p>
+                            </div>
+                        </article>
+                        <article class="memory-card memory-placeholder-card reveal" data-memory-order="19" data-person="couple" data-location="Wedding road ahead" data-map-x="72" data-map-y="62" data-image="https://img.freepik.com/free-vector/cute-couple-boy-girl-sitting-together-cartoon-vector-icon-illustration-people-holiday-icon-conc_138676-12418.jpg?semt=ais_hybrid&amp;w=740&amp;q=80">
+                            <img src="https://img.freepik.com/free-vector/cute-couple-boy-girl-sitting-together-cartoon-vector-icon-illustration-people-holiday-icon-conc_138676-12418.jpg?semt=ais_hybrid&amp;w=740&amp;q=80" alt="Wedding future placeholder">
+                            <div class="memory-content">
+                                <p class="memory-date">Forever Ahead</p>
+                                <h3>The Next Chapter</h3>
+                                <p>From this timeline forward, every place becomes more beautiful because they arrive there together.</p>
+                            </div>
+                        </article>
                     </div>
-                </article>
-                <article class="memory-card reveal">
-                    <img src="images/fance.png" alt="Dance and music memory">
-                    <div class="memory-content">
-                        <p class="memory-date">May 12, 2025</p>
-                        <h3>First Dance</h3>
-                        <p>Just us and the music, dancing like the world had paused for us.</p>
-                    </div>
-                </article>
-            </div>
-
-            <div class="memory-grid memory-timeline">
-                <article class="memory-card reveal">
-                    <img src="images/bike.png" alt="Bike ride memory">
-                    <div class="memory-content">
-                        <p class="memory-date">June 1, 2025</p>
-                        <h3>First Ride</h3>
-                        <p>Wind in our faces, your arms around me, and laughter in every turn.</p>
-                    </div>
-                </article>
-                <article class="memory-card reveal">
-                    <img src="images/agara.jpeg" alt="Lake sunset memory">
-                    <div class="memory-content">
-                        <p class="memory-date">June 21, 2025</p>
-                        <h3>Agara Lake</h3>
-                        <p>Golden sunset, quiet water, and a memory that still glows.</p>
-                    </div>
-                </article>
-            </div>
-
-            <div class="memory-grid memory-timeline">
-                <article class="memory-card reveal">
-                    <img src="images/new_year.png" alt="New Year celebration memory">
-                    <div class="memory-content">
-                        <p class="memory-date">December 31, 2025</p>
-                        <h3>New Year</h3>
-                        <p>Midnight smiles, chocolates, and the soft magic of new beginnings.</p>
-                    </div>
-                </article>
-                <article class="memory-card reveal">
-                    <img src="images/engaged.png" alt="Engagement ring decision memory">
-                    <div class="memory-content">
-                        <p class="memory-date">January 5, 2026</p>
-                        <h3>Marriage Decision</h3>
-                        <p>The day we said yes to forever and felt our future become real.</p>
-                    </div>
-                </article>
-                
-            </div>
-
-            <div class="memory-grid memory-timeline">
-                <article class="memory-card reveal">
-                    <img src="images/ooty.jpg" alt="Ooty trip hills memory">
-                    <div class="memory-content">
-                        <p class="memory-date">February 2, 2026</p>
-                        <h3>Ooty Trip</h3>
-                        <p>One last getaway before wedding plans turned into our next chapter.</p>
-                    </div>
-                </article>
-                <article class="memory-card reveal">
-                    <img src="images/valentine.jpg" alt="Romantic candlelight date memory">
-                    <div class="memory-content">
-                        <p class="memory-date">February 14, 2026</p>
-                        <h3>Valentine Day</h3>
-                        <p>Candlelight, music, and heartbeats perfectly in sync.</p>
-                    </div>
-                </article>
-            </div>
-
-            <div class="memory-grid memory-timeline">
-                <article class="memory-card reveal">
-                    <div class="memory-media">
-                        <img src="images/fance.png" alt="Cover image for Dance video">
-                        <span class="video-badge" aria-hidden="true">Play</span>
-                    </div>
-                    <div class="memory-content">
-                        <p class="memory-date">February 6, 2026</p>
-                        <h3>Dance Video</h3>
-                        <p>A romantic video of our dance before the wedding.</p>
-                    </div>
-                </article>
+                </div>
             </div>
         </section>
 

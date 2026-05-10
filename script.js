@@ -11,6 +11,7 @@ const cdSeconds = document.getElementById("cdSeconds");
 
 const tabButtons = Array.from(document.querySelectorAll(".tab-btn"));
 const tabPanels = Array.from(document.querySelectorAll(".tab-panel"));
+const topNav = document.querySelector(".top-nav");
 // Single source of truth for tab visibility.
 // Set any tab to false to hide it.
 const tabVisibilityConfig = Object.freeze({
@@ -30,6 +31,18 @@ const letterLockState = document.getElementById("letterLockState");
 const letterFunError = document.getElementById("letterFunError");
 
 const memoryCards = Array.from(document.querySelectorAll(".memory-card"));
+const memoriesPanel = document.getElementById("memories");
+const memoryPlayToggle = document.getElementById("memoryPlayToggle");
+const memoryReplayBtn = document.getElementById("memoryReplayBtn");
+const memoryPlayStatus = document.getElementById("memoryPlayStatus");
+const memoryProgressFill = document.getElementById("memoryProgressFill");
+const memoryStage = document.querySelector(".memory-stage");
+const memoryStageImage = document.getElementById("memoryStageImage");
+const memoryStageVideo = document.getElementById("memoryStageVideo");
+const memoryStageDate = document.getElementById("memoryStageDate");
+const memoryStageTitle = document.getElementById("memoryStageTitle");
+const memoryStageLocation = document.getElementById("memoryStageLocation");
+const memoryListPanel = document.querySelector(".memory-left");
 const itineraryItems = Array.from(document.querySelectorAll(".itinerary-item"));
 const lightbox = document.getElementById("memoryLightbox");
 const lightboxImage = document.getElementById("lightboxImage");
@@ -92,6 +105,12 @@ let popAudioCtx = null;
 let panelSectionRaf = null;
 let wishCycleDeck = [];
 let wishCycleCursor = 0;
+let memoryPlaybackTimer = null;
+let activeMemoryIndex = -1;
+let isMemoryPlaybackRunning = false;
+let musicStartedByMemoryPlayback = false;
+const defaultImageMemoryDuration = 5000;
+const defaultVideoMemoryDuration = 18000;
 
 function syncModalBodyLock() {
     const hasOpenModal = Boolean(document.querySelector(".lightbox.open"));
@@ -171,6 +190,9 @@ function updateTimers() {
 function activateTab(tabId) {
     const resolvedTabId = resolveAvailableTab(tabId);
     if (!resolvedTabId) return;
+    document.body.classList.remove("home-tab-active", "countdown-tab-active", "memories-tab-active", "partners-tab-active", "letter-tab-active");
+    document.body.classList.add(`${resolvedTabId}-tab-active`);
+    document.body.classList.toggle("memories-tab-active", resolvedTabId === "memories");
 
     tabButtons.forEach((button) => {
         const isActive = !button.hidden && button.dataset.tab === resolvedTabId;
@@ -187,6 +209,8 @@ function activateTab(tabId) {
             if (panel.id === "countdown") {
                 requestAnimationFrame(renderWishBubbles);
             }
+        } else if (panel.id === "memories") {
+            pauseMemoryPlayback();
         }
     });
 }
@@ -405,33 +429,26 @@ function closeLightbox() {
 
 function setupMemoryLightbox() {
     memoryCards.forEach((card) => {
-        const image = card.querySelector(".memory-media img, img");
         const title = card.querySelector("h3")?.textContent?.trim() || "Memory";
-        const description = card.querySelector("p")?.textContent?.trim() || "";
-        const caption = description ? `${title}: ${description}` : title;
-        const videoUrl = card.dataset.video || "";
-        const videoEmbed = getYouTubeEmbedUrl(videoUrl);
+        const order = Number(card.dataset.memoryOrder || 0);
 
         card.setAttribute("role", "button");
         card.setAttribute("tabindex", "0");
-        card.setAttribute(
-            "aria-label",
-            videoEmbed ? `Open ${title} video memory` : `Open ${title} memory`
-        );
+        card.setAttribute("aria-label", `Show ${title} on the memory stage`);
 
-        const openCardLightbox = () =>
-            openLightbox({
-                src: image?.src || "",
-                alt: image?.alt || "Full memory image",
-                caption,
-                videoEmbed
-            });
+        const showCardMemory = () => {
+            const orderedCards = getOrderedMemoryCards();
+            const cardIndex = orderedCards.findIndex((item) => Number(item.dataset.memoryOrder || 0) === order);
+            if (cardIndex >= 0) {
+                setActiveMemory(cardIndex);
+            }
+        };
 
-        card.addEventListener("click", openCardLightbox);
+        card.addEventListener("click", showCardMemory);
         card.addEventListener("keydown", (event) => {
             if (event.key === "Enter" || event.key === " ") {
                 event.preventDefault();
-                openCardLightbox();
+                showCardMemory();
             }
         });
     });
@@ -457,6 +474,234 @@ function setupMemoryLightbox() {
             closeWishFormModal();
         }
     });
+}
+
+function getOrderedMemoryCards() {
+    return [...memoryCards].sort((a, b) => {
+        const aOrder = Number(a.dataset.memoryOrder || 0);
+        const bOrder = Number(b.dataset.memoryOrder || 0);
+        return aOrder - bOrder;
+    });
+}
+
+function getMemoryImage(card) {
+    return card?.dataset.image || card?.querySelector(".memory-media img, img")?.src || "";
+}
+
+function getMemoryVideoEmbed(card) {
+    const videoUrl = card?.dataset.video || "";
+    return getYouTubeEmbedUrl(videoUrl);
+}
+
+function getMemoryPlaybackDuration(card) {
+    const customDuration = Number(card?.dataset.duration || card?.dataset.videoDuration || 0);
+    if (Number.isFinite(customDuration) && customDuration > 0) return customDuration;
+    return getMemoryVideoEmbed(card) ? defaultVideoMemoryDuration : defaultImageMemoryDuration;
+}
+
+function updateMemoryStage(card) {
+    if (!card || !memoryStageImage) return;
+
+    const nextImage = getMemoryImage(card);
+    const videoEmbed = getMemoryVideoEmbed(card);
+    const title = card.querySelector("h3")?.textContent?.trim() || "Memory";
+    const date = card.querySelector(".memory-date")?.textContent?.trim() || "Our story";
+    const location = card.dataset.location || "A place in our story";
+
+    if (memoryStage) {
+        memoryStage.classList.add("is-swapping");
+    }
+
+    window.setTimeout(() => {
+        if (videoEmbed && memoryStageVideo) {
+            memoryStageImage.style.display = "none";
+            memoryStageVideo.style.display = "block";
+            memoryStageVideo.src = `${videoEmbed}&playsinline=1`;
+        } else {
+            if (memoryStageVideo) {
+                memoryStageVideo.style.display = "none";
+                memoryStageVideo.src = "";
+            }
+            memoryStageImage.style.display = "block";
+            memoryStageImage.src = nextImage;
+            memoryStageImage.alt = `${title} memory image`;
+        }
+
+        if (memoryStageDate) memoryStageDate.textContent = date;
+        if (memoryStageTitle) memoryStageTitle.textContent = title;
+        if (memoryStageLocation) memoryStageLocation.textContent = location;
+
+        if (memoryStage) {
+            memoryStage.classList.remove("is-swapping");
+        }
+    }, 120);
+}
+
+function clearMemoryPlaybackTimer() {
+    if (memoryPlaybackTimer) {
+        clearTimeout(memoryPlaybackTimer);
+        memoryPlaybackTimer = null;
+    }
+}
+
+function scheduleNextMemory(card) {
+    clearMemoryPlaybackTimer();
+    memoryPlaybackTimer = setTimeout(advanceMemoryPlayback, getMemoryPlaybackDuration(card));
+}
+
+function updateMemoryPlaybackUi(isPlaying) {
+    if (!memoryPlayToggle) return;
+
+    memoryPlayToggle.classList.toggle("is-playing", isPlaying);
+    memoryPlayToggle.setAttribute("aria-pressed", isPlaying ? "true" : "false");
+    document.body.classList.toggle("memory-playback-active", isPlaying);
+    if (topNav) {
+        topNav.setAttribute("aria-hidden", isPlaying ? "true" : "false");
+    }
+
+    const label = memoryPlayToggle.querySelector(".memory-play-label");
+    if (label) {
+        label.textContent = isPlaying ? "Pause Memories" : "Play Memories";
+    }
+}
+
+function setActiveMemory(index, shouldScroll = true) {
+    const orderedCards = getOrderedMemoryCards();
+    if (!orderedCards.length) return;
+
+    const safeIndex = (index + orderedCards.length) % orderedCards.length;
+    activeMemoryIndex = safeIndex;
+
+    orderedCards.forEach((card, cardIndex) => {
+        card.classList.toggle("is-playing-memory", cardIndex === safeIndex);
+    });
+
+    const activeCard = orderedCards[safeIndex];
+    const date = activeCard.querySelector(".memory-date")?.textContent?.trim() || "Our story";
+    const title = activeCard.querySelector("h3")?.textContent?.trim() || "Memory";
+
+    if (memoryPlayStatus) {
+        memoryPlayStatus.textContent = `${safeIndex + 1} of ${orderedCards.length}: ${date} - ${title}`;
+    }
+
+    if (memoryProgressFill) {
+        memoryProgressFill.style.width = `${((safeIndex + 1) / orderedCards.length) * 100}%`;
+    }
+
+    updateMemoryStage(activeCard);
+
+    if (shouldScroll) {
+        if (memoryListPanel) {
+            const panelTop = memoryListPanel.getBoundingClientRect().top;
+            const cardTop = activeCard.getBoundingClientRect().top;
+            const centeredOffset = cardTop - panelTop - memoryListPanel.clientHeight / 2 + activeCard.offsetHeight / 2;
+            memoryListPanel.scrollTo({
+                top: memoryListPanel.scrollTop + centeredOffset,
+                behavior: "smooth"
+            });
+        } else {
+            activeCard.scrollIntoView({ behavior: "smooth", block: "center", inline: "nearest" });
+        }
+    }
+}
+
+function advanceMemoryPlayback() {
+    const orderedCards = getOrderedMemoryCards();
+    if (!orderedCards.length) return;
+
+    if (activeMemoryIndex >= orderedCards.length - 1) {
+        pauseMemoryPlayback();
+        if (memoryPlayStatus) {
+            memoryPlayStatus.textContent = "Story complete - replay the journey whenever your heart wants.";
+        }
+        return;
+    }
+
+    setActiveMemory(activeMemoryIndex + 1);
+    if (isMemoryPlaybackRunning) {
+        scheduleNextMemory(orderedCards[activeMemoryIndex]);
+    }
+}
+
+async function startMemoryPlaybackMusic() {
+    if (!bgMusic || !bgMusic.paused) return;
+
+    try {
+        await bgMusic.play();
+        musicStartedByMemoryPlayback = true;
+        updateMusicUi(true);
+    } catch (error) {
+        musicStartedByMemoryPlayback = false;
+        updateMusicUi(false);
+        if (musicStatus) {
+            musicStatus.textContent = "Unable to autoplay. Tap Play Memories again.";
+        }
+    }
+}
+
+function stopMemoryPlaybackMusic() {
+    if (!bgMusic || !musicStartedByMemoryPlayback) return;
+
+    bgMusic.pause();
+    musicStartedByMemoryPlayback = false;
+    updateMusicUi(false);
+}
+
+function pauseMemoryPlayback() {
+    clearMemoryPlaybackTimer();
+
+    isMemoryPlaybackRunning = false;
+    updateMemoryPlaybackUi(false);
+    stopMemoryPlaybackMusic();
+    if (memoryStageVideo) {
+        memoryStageVideo.src = "";
+        memoryStageVideo.style.display = "none";
+    }
+    if (memoryStageImage && activeMemoryIndex >= 0) {
+        const activeCard = getOrderedMemoryCards()[activeMemoryIndex];
+        memoryStageImage.style.display = "block";
+        memoryStageImage.src = getMemoryImage(activeCard);
+    }
+}
+
+function startMemoryPlayback(reset = false) {
+    if (!memoryCards.length) return;
+    const orderedCards = getOrderedMemoryCards();
+
+    pauseMemoryPlayback();
+
+    if (reset || activeMemoryIndex < 0) {
+        setActiveMemory(0);
+    } else {
+        setActiveMemory(activeMemoryIndex);
+    }
+
+    isMemoryPlaybackRunning = true;
+    updateMemoryPlaybackUi(true);
+    void startMemoryPlaybackMusic();
+    scheduleNextMemory(orderedCards[activeMemoryIndex]);
+}
+
+function setupMemoryPlayback() {
+    if (!memoriesPanel || !memoryPlayToggle || !memoryCards.length) return;
+
+    setActiveMemory(0, false);
+    updateMemoryPlaybackUi(false);
+
+    memoryPlayToggle.addEventListener("click", () => {
+        if (isMemoryPlaybackRunning) {
+            pauseMemoryPlayback();
+            return;
+        }
+
+        startMemoryPlayback(activeMemoryIndex >= getOrderedMemoryCards().length - 1);
+    });
+
+    if (memoryReplayBtn) {
+        memoryReplayBtn.addEventListener("click", () => {
+            startMemoryPlayback(true);
+        });
+    }
 }
 
 function parseLegacyProgramItems(type, value) {
@@ -1572,6 +1817,7 @@ setupTabSectionScrollExperience();
 activateInitialTab("home");
 setupRevealAnimations();
 setupMemoryLightbox();
+setupMemoryPlayback();
 setupActivityModal();
 setupPartnerModal();
 setupWishFormModal();
