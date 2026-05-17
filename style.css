@@ -1700,6 +1700,23 @@ body.memory-playback-active .memory-left {
     animation: timelineGlow 3.4s ease-in-out infinite;
 }
 
+.memory-timeline > [data-memory-order="1"] { order: 10; }
+.memory-timeline > [data-memory-order="2"] { order: 20; }
+.memory-timeline > [data-memory-order="3"] { order: 30; }
+.memory-timeline > [data-memory-order="4"] { order: 40; }
+.memory-timeline > [data-memory-order="5"] { order: 50; }
+.memory-timeline > [data-memory-order="6"] { order: 60; }
+.memory-timeline > [data-memory-order="7"] { order: 70; }
+.memory-timeline > [data-memory-order="8"] { order: 80; }
+.memory-timeline > [data-memory-order="9"] { order: 90; }
+.memory-timeline > [data-memory-order="10"] { order: 100; }
+.memory-timeline > [data-memory-order="11"] { order: 110; }
+.memory-timeline > [data-memory-order="12"] { order: 120; }
+.memory-timeline > [data-memory-order="13"] { order: 130; }
+.memory-timeline > [data-memory-order="14"] { order: 140; }
+.memory-timeline > [data-memory-order="15"] { order: 150; }
+.memory-timeline > [data-memory-order="16"] { order: 160; }
+
 .memory-card {
     position: relative;
     background: rgba(255, 245, 247, 0.1);
@@ -1920,23 +1937,22 @@ body.memory-playback-active .memory-left {
     color: #ffebef;
 }
 
-/* Milestone Mood Effects */
 .milestone-mood {
-    background: linear-gradient(135deg, rgba(255, 105, 180, 0.08), rgba(255, 182, 193, 0.06));
-    transition: background 1.5s ease-in-out;
+    transition: none;
 }
 
 .milestone-mood::before {
+    content: none;
+}
+
+.memory-stage.is-milestone-preview::before {
     content: "";
-    position: fixed;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
+    position: absolute;
+    inset: 0;
     background: radial-gradient(circle at center, rgba(255, 105, 180, 0.1) 0%, transparent 70%);
     animation: milestoneGlow 3s ease-in-out infinite alternate;
     pointer-events: none;
-    z-index: -1;
+    z-index: 2;
 }
 
 @keyframes milestoneGlow {
@@ -1968,6 +1984,7 @@ body.memory-playback-active .memory-visual-panel {
 }
 
 .memory-stage {
+    position: relative;
     margin: 0;
     overflow: hidden;
     border-radius: 0.95rem;
@@ -1975,7 +1992,18 @@ body.memory-playback-active .memory-visual-panel {
     background: rgba(11, 4, 9, 0.34);
 }
 
+.memory-preview-confetti {
+    position: absolute;
+    inset: 0;
+    z-index: 5;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+}
+
 .memory-stage img {
+    position: relative;
+    z-index: 1;
     width: 100%;
     flex: 1;
     min-height: 0;
@@ -1987,6 +2015,8 @@ body.memory-playback-active .memory-visual-panel {
 }
 
 .memory-stage-video {
+    position: relative;
+    z-index: 1;
     display: none;
     width: 100%;
     flex: 1;
@@ -2002,6 +2032,8 @@ body.memory-playback-active .memory-visual-panel {
 }
 
 .memory-stage figcaption {
+    position: relative;
+    z-index: 6;
     padding: 0.95rem 1rem 1.05rem;
 }
 
@@ -2029,6 +2061,50 @@ body.memory-playback-active .memory-visual-panel {
     margin-top: 0.55rem;
     color: #ffeef4;
     font-size: 0.94rem;
+}
+
+.memory-stage.is-milestone-preview {
+    border-color: rgba(255, 119, 173, 0.6);
+    box-shadow: 0 0 0 4px rgba(255, 119, 173, 0.12), 0 24px 45px rgba(0, 0, 0, 0.38);
+}
+
+.memory-stage.is-milestone-preview figcaption {
+    background:
+        radial-gradient(circle at 16% 20%, rgba(255, 212, 122, 0.24), transparent 34%),
+        linear-gradient(135deg, rgba(255, 119, 173, 0.24), rgba(58, 21, 45, 0.92));
+}
+
+.memory-stage::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    z-index: 5;
+    pointer-events: none;
+    opacity: 0;
+}
+
+body.memory-confetti-fallback .memory-stage::after {
+    background-image:
+        radial-gradient(circle, #ff77ad 0 3px, transparent 4px),
+        radial-gradient(circle, #ffd47a 0 3px, transparent 4px),
+        radial-gradient(circle, #ffffff 0 2px, transparent 3px),
+        radial-gradient(circle, #b992ff 0 3px, transparent 4px);
+    background-size: 90px 90px, 120px 120px, 70px 70px, 110px 110px;
+    animation: fallbackConfetti 900ms ease-out forwards;
+}
+
+@keyframes fallbackConfetti {
+    from {
+        opacity: 0;
+        transform: translateY(-18px);
+    }
+    18% {
+        opacity: 1;
+    }
+    to {
+        opacity: 0;
+        transform: translateY(42px);
+    }
 }
 
 @media (min-width: 701px) {

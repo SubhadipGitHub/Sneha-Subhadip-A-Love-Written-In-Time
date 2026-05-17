@@ -40,6 +40,7 @@ const letterLockState = document.getElementById("letterLockState");
 const letterFunError = document.getElementById("letterFunError");
 
 const memoryCards = Array.from(document.querySelectorAll(".memory-card"));
+const memoryTimelineItems = Array.from(document.querySelectorAll(".memory-card, .memory-milestone-card"));
 const memoriesPanel = document.getElementById("memories");
 const memoryPlayToggle = document.getElementById("memoryPlayToggle");
 const memoryReplayBtn = document.getElementById("memoryReplayBtn");
@@ -107,11 +108,11 @@ const activityModalDetail = document.getElementById("activityModalDetail");
 const bgMusic = document.getElementById("bgMusic");
 const musicToggleBtn = document.getElementById("musicToggleBtn");
 const musicStatus = document.getElementById("musicStatus");
-const defaultMusicTracks = ["audio/romantic.mp4", "audio/romantic_1.mp3"];
+const defaultMusicTracks = ["audio/romantic.mp3", "audio/romantic_1.mp3"];
 const categoryMusicTracks = {
     guy: ["audio/calm.mp3"],
     girl: ["audio/warm.mp3"],
-    couple: ["audio/romantic.mp4", "audio/romantic_1.mp3"],
+    couple: ["audio/romantic.mp3", "audio/romantic_1.mp3"],
     finale: ["audio/epic.mp3"]
 };
 const wishesStorageKey = "wedding_wishes_v1";
@@ -128,6 +129,9 @@ let activeMemoryIndex = -1;
 let isMemoryPlaybackRunning = false;
 let musicStartedByMemoryPlayback = false;
 let currentMemoryCategory = null;
+let musicPausedForMemoryVideo = false;
+let musicWasPlayingBeforeMemoryVideo = false;
+let memoryPreviewConfetti = null;
 
 // Update memory-card wait times here. Values are in milliseconds: 10000 = 10 seconds.
 const memoryPlaybackDurations = {
@@ -459,8 +463,8 @@ function closeLightbox() {
 }
 
 function setupMemoryLightbox() {
-    memoryCards.forEach((card) => {
-        const title = card.querySelector("h3")?.textContent?.trim() || "Memory";
+    memoryTimelineItems.forEach((card) => {
+        const title = getMemoryTitle(card);
         const order = Number(card.dataset.memoryOrder || 0);
 
         card.setAttribute("role", "button");
@@ -469,7 +473,7 @@ function setupMemoryLightbox() {
 
         const showCardMemory = () => {
             const orderedCards = getOrderedMemoryCards();
-            const cardIndex = orderedCards.findIndex((item) => Number(item.dataset.memoryOrder || 0) === order);
+            const cardIndex = orderedCards.findIndex((item) => Number(item.dataset.memoryOrder || 0) === order && item === card);
             if (cardIndex >= 0) {
                 setActiveMemory(cardIndex);
             }
@@ -511,20 +515,80 @@ function setupMemoryLightbox() {
 }
 
 function getOrderedMemoryCards() {
-    return [...memoryCards].sort((a, b) => {
+    return [...memoryTimelineItems].sort((a, b) => {
         const aOrder = Number(a.dataset.memoryOrder || 0);
         const bOrder = Number(b.dataset.memoryOrder || 0);
         return aOrder - bOrder;
     });
 }
 
+function isMemoryMilestone(card) {
+    return card?.classList.contains("memory-milestone-card");
+}
+
 function getMemoryImage(card) {
     return card?.dataset.image || card?.querySelector(".memory-media img, img")?.src || "";
+}
+
+function getMemoryTitle(card) {
+    return card?.dataset.title || card?.querySelector("h3, .milestone-label")?.textContent?.trim() || "Memory";
+}
+
+function getMemoryDate(card) {
+    return card?.dataset.date || card?.querySelector(".memory-date")?.textContent?.trim() || "Our story";
+}
+
+function getMemoryLocation(card) {
+    if (isMemoryMilestone(card)) {
+        return card?.dataset.preview || card?.dataset.location || "A milestone in our story";
+    }
+    return card?.dataset.location || card?.dataset.preview || "A place in our story";
 }
 
 function getMemoryVideoEmbed(card) {
     const videoUrl = card?.dataset.video || "";
     return getYouTubeEmbedUrl(videoUrl);
+}
+
+function isMemoryVideoCard(card) {
+    return Boolean(getMemoryVideoEmbed(card));
+}
+
+function withYouTubeAutoplay(embedUrl) {
+    if (!embedUrl) return "";
+
+    try {
+        const parsed = new URL(embedUrl, window.location.href);
+        parsed.searchParams.set("autoplay", "1");
+        parsed.searchParams.set("playsinline", "1");
+        return parsed.toString();
+    } catch (error) {
+        const separator = embedUrl.includes("?") ? "&" : "?";
+        return `${embedUrl}${separator}autoplay=1&playsinline=1`;
+    }
+}
+
+function pauseMusicForMemoryVideo() {
+    if (!bgMusic || bgMusic.paused) return;
+
+    musicWasPlayingBeforeMemoryVideo = true;
+    musicPausedForMemoryVideo = true;
+    bgMusic.pause();
+    updateMusicUi(false);
+}
+
+function resumeMusicAfterMemoryVideo() {
+    if (!musicPausedForMemoryVideo) return;
+
+    const shouldResumeMusic = musicWasPlayingBeforeMemoryVideo;
+    musicPausedForMemoryVideo = false;
+    musicWasPlayingBeforeMemoryVideo = false;
+
+    if (shouldResumeMusic && bgMusic) {
+        bgMusic.play()
+            .then(() => updateMusicUi(true))
+            .catch(() => updateMusicUi(false));
+    }
 }
 
 function getMemoryPlaybackDuration(card) {
@@ -538,19 +602,20 @@ function updateMemoryStage(card) {
 
     const nextImage = getMemoryImage(card);
     const videoEmbed = getMemoryVideoEmbed(card);
-    const title = card.querySelector("h3")?.textContent?.trim() || "Memory";
-    const date = card.querySelector(".memory-date")?.textContent?.trim() || "Our story";
-    const location = card.dataset.location || "A place in our story";
+    const title = getMemoryTitle(card);
+    const date = getMemoryDate(card);
+    const location = getMemoryLocation(card);
 
     if (memoryStage) {
         memoryStage.classList.add("is-swapping");
+        memoryStage.classList.toggle("is-milestone-preview", isMemoryMilestone(card));
     }
 
     window.setTimeout(() => {
         if (videoEmbed && memoryStageVideo) {
             memoryStageImage.style.display = "none";
             memoryStageVideo.style.display = "block";
-            memoryStageVideo.src = `${videoEmbed}&playsinline=1`;
+            memoryStageVideo.src = withYouTubeAutoplay(videoEmbed);
         } else {
             if (memoryStageVideo) {
                 memoryStageVideo.style.display = "none";
@@ -569,6 +634,56 @@ function updateMemoryStage(card) {
             memoryStage.classList.remove("is-swapping");
         }
     }, 120);
+}
+
+// Memory preview milestone confetti only.
+function getMemoryPreviewConfetti() {
+    if (!memoryStage || typeof window.confetti !== "function") return null;
+    if (memoryPreviewConfetti) return memoryPreviewConfetti;
+
+    const canvas = document.createElement("canvas");
+    canvas.className = "memory-preview-confetti";
+    canvas.setAttribute("aria-hidden", "true");
+    memoryStage.appendChild(canvas);
+
+    memoryPreviewConfetti = window.confetti.create(canvas, {
+        resize: true,
+        useWorker: true
+    });
+
+    return memoryPreviewConfetti;
+}
+
+function burstMemoryMilestoneConfetti() {
+    const colors = ["#ff77ad", "#ffd47a", "#ffffff", "#b992ff", "#ffb3c9"];
+    const previewConfetti = getMemoryPreviewConfetti();
+
+    if (previewConfetti) {
+        previewConfetti({
+            particleCount: 90,
+            spread: 72,
+            origin: { y: 0.38 },
+            colors
+        });
+        previewConfetti({
+            particleCount: 45,
+            angle: 60,
+            spread: 55,
+            origin: { x: 0, y: 0.55 },
+            colors
+        });
+        previewConfetti({
+            particleCount: 45,
+            angle: 120,
+            spread: 55,
+            origin: { x: 1, y: 0.55 },
+            colors
+        });
+        return;
+    }
+
+    document.body.classList.add("memory-confetti-fallback");
+    window.setTimeout(() => document.body.classList.remove("memory-confetti-fallback"), 900);
 }
 
 function clearMemoryPlaybackTimer() {
@@ -614,7 +729,7 @@ function isFinalMemoryCard(card) {
 
 function getMemoryCategory(card) {
     if (isFinalMemoryCard(card)) return "finale";
-    if (card.classList.contains("memory-milestone-card")) return "milestone";
+    if (isMemoryMilestone(card)) return "milestone";
     return card.dataset.person || "couple";
 }
 
@@ -631,19 +746,29 @@ function setActiveMemory(index, shouldScroll = true) {
 
     const activeCard = orderedCards[safeIndex];
     const category = getMemoryCategory(activeCard);
+    const isMilestone = category === "milestone";
+    const isVideoCard = isMemoryVideoCard(activeCard);
+
+    if (isVideoCard) {
+        pauseMusicForMemoryVideo();
+    } else if (!isVideoCard && musicPausedForMemoryVideo) {
+        resumeMusicAfterMemoryVideo();
+    }
     
-    // Only switch music if category changes from previous
-    if (category !== currentMemoryCategory) {
+    // Milestones are visual-only moments; never start, pause, or change music for them.
+    if (!isMilestone && !isVideoCard && category !== currentMemoryCategory) {
         currentMemoryCategory = category;
         switchMemoryForCategory(category);
     }
 
-    // Add milestone mood effect
-    const isMilestone = category === "milestone";
     document.body.classList.toggle("milestone-mood", isMilestone);
+    if (isMilestone && shouldScroll) {
+        // Preview-only celebration for milestone cards.
+        burstMemoryMilestoneConfetti();
+    }
 
-    const date = activeCard.querySelector(".memory-date")?.textContent?.trim() || "Our story";
-    const title = activeCard.querySelector("h3")?.textContent?.trim() || "Memory";
+    const date = getMemoryDate(activeCard);
+    const title = getMemoryTitle(activeCard);
 
     if (memoryPlayStatus) {
         memoryPlayStatus.textContent = `${safeIndex + 1} of ${orderedCards.length}: ${date} - ${title}`;
@@ -719,6 +844,8 @@ function pauseMemoryPlayback() {
     updateMemoryPlaybackUi(false);
     stopMemoryPlaybackMusic();
     currentMemoryCategory = null;
+    musicPausedForMemoryVideo = false;
+    musicWasPlayingBeforeMemoryVideo = false;
     if (memoryStageVideo) {
         memoryStageVideo.src = "";
         memoryStageVideo.style.display = "none";
@@ -731,7 +858,7 @@ function pauseMemoryPlayback() {
 }
 
 function startMemoryPlayback(reset = false) {
-    if (!memoryCards.length) return;
+    if (!memoryTimelineItems.length) return;
     const orderedCards = getOrderedMemoryCards();
 
     pauseMemoryPlayback();
@@ -745,12 +872,14 @@ function startMemoryPlayback(reset = false) {
     isMemoryPlaybackRunning = true;
     updateMemoryPlaybackUi(true);
     centerMemoryPlaybackView();
-    void startMemoryPlaybackMusic();
+    if (!isMemoryVideoCard(orderedCards[activeMemoryIndex])) {
+        void startMemoryPlaybackMusic();
+    }
     scheduleNextMemory(orderedCards[activeMemoryIndex]);
 }
 
 function setupMemoryPlayback() {
-    if (!memoriesPanel || !memoryPlayToggle || !memoryCards.length) return;
+    if (!memoriesPanel || !memoryPlayToggle || !memoryTimelineItems.length) return;
 
     setActiveMemory(0, false);
     updateMemoryPlaybackUi(false);
