@@ -1716,6 +1716,8 @@ body.memory-playback-active .memory-left {
 .memory-timeline > [data-memory-order="14"] { order: 140; }
 .memory-timeline > [data-memory-order="15"] { order: 150; }
 .memory-timeline > [data-memory-order="16"] { order: 160; }
+.memory-timeline > [data-memory-order="17"] { order: 170; }
+.memory-timeline > [data-memory-order="18"] { order: 180; }
 
 .memory-card {
     position: relative;
